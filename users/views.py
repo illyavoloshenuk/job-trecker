@@ -2,6 +2,7 @@ import json
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import UserProfile, JobApplication
+from .filters import filter_applications
 
 @csrf_exempt
 def user_home(request):
@@ -104,6 +105,14 @@ def application_home(request):
     if request.method == 'GET':
         applications = JobApplication.objects.all()
 
+        applications, error = filter_applications(applications, request.GET)
+
+        if error:
+            return JsonResponse(
+                {'error': error},
+                status=400,
+            )
+
         data = []
         for application in applications:
             data.append({
@@ -129,6 +138,7 @@ def application_home(request):
                 {'error': 'Invalid JSON'},
                 status = 400,
             )
+
 
         title = body.get('title')
         company = body.get('company')
