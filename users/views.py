@@ -1,4 +1,6 @@
 import json
+from urllib import request
+
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import UserProfile, JobApplication
@@ -191,6 +193,60 @@ def application_detail(request, id):
             'notes': application.notes,
         }
         return JsonResponse(data)
+
+    if request.method == 'PATCH':
+        try:
+            body = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse(
+                {'error': 'Invalid JSON'},
+                status = 400,
+            )
+
+        if 'title' in body:
+            application.title = body['title']
+
+        if 'company' in body:
+            application.company = body['company']
+
+        if 'status' in body:
+            application.status = body['status']
+
+        if 'date_applied' in body:
+            application.date_applied = body['date_applied']
+
+        if 'job_link' in body:
+            application.job_link = body['job_link']
+
+        if 'location' in body:
+            application.location = body['location']
+
+        if 'salary' in body:
+            application.salary = body['salary']
+
+        if 'notes' in body:
+            application.notes = body['notes']
+
+        application.save()
+
+        return JsonResponse(
+            {
+                'id': application.id,
+                'title': application.title,
+                'company': application.company,
+                'status': application.status,
+                'date_applied': application.date_applied,
+                'job_link': application.job_link,
+                'location': application.location,
+                'salary': application.salary,
+                'notes': application.notes,
+            }
+        )
+    if request.method == 'DELETE':
+        application.delete()
+        return JsonResponse(status=204)
+
+
 
     return JsonResponse(
         {'error': 'Method not allowed'},
