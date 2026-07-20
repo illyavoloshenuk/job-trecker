@@ -3,6 +3,10 @@ from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import UserProfile, JobApplication
 from .filters import filter_applications
+from django.shortcuts import render
+
+def job_tracker_page(request):
+    return render(request, 'job_tracker.html')
 
 @csrf_exempt
 def user_home(request):

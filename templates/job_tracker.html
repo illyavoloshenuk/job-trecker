@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Tracker</title>
+</head>
+<body>
+    <h1>Job Tracker</h1>
+    <p>This page shows job applications from the Django API.</p>
+
+    <button id="load-applications-button">Load applications</button>
+
+    <div id="applications-container"></div>
+
+    <script>
+    const loadApplicationsButton = document.getElementById('load-applications-button');
+    const applicationsContainer = document.getElementById('applications-container');
+
+    async function loadApplications() {
+        applicationsContainer.innerHTML = '<p>Loading...</p>';
+
+        try {
+            const response = await fetch('/applications/');
+
+            if (!response.ok) {
+                throw new Error('Failed to load applications');
+            }
+
+            const data = await response.json();
+            const applications = data.applications;
+
+            if (applications.length === 0) {
+                applicationsContainer.innerHTML = '<p>No applications found.</p>';
+                return;
+            }
+
+            let html = '';
+
+            for (const application of applications) {
+                html += `
+                    <div>
+                        <h3>${application.title}</h3>
+                        <p><strong>Company:</strong> ${application.company}</p>
+                        <p><strong>Status:</strong> ${application.status}</p>
+                        <p><strong>Location:</strong> ${application.location}</p>
+                        <p><strong>Salary:</strong> ${application.salary}</p>
+                        <p><strong>Date applied:</strong> ${application.date_applied}</p>
+                        <hr>
+                    </div>
+                `;
+            }
+
+            applicationsContainer.innerHTML = html;
+        } catch (error) {
+            applicationsContainer.innerHTML = '<p>Error loading applications.</p>';
+        }
+    }
+
+    loadApplicationsButton.addEventListener('click', loadApplications);
+</script>
+</body>
+</html>
