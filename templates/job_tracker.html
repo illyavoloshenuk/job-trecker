@@ -4,60 +4,1118 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Job Tracker</title>
-</head>
-<body>
-    <h1>Job Tracker</h1>
-    <p>This page shows job applications from the Django API.</p>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
 
-    <button id="load-applications-button">Load applications</button>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(180deg, #f4f4f5 0%, #e9e9ec 100%);
+            color: #111111;
+        }
 
-    <div id="applications-container"></div>
+        .page {
+            max-width: 1120px;
+            margin: 0 auto;
+            padding: 40px 20px 120px;
+        }
 
-    <script>
-    const loadApplicationsButton = document.getElementById('load-applications-button');
-    const applicationsContainer = document.getElementById('applications-container');
+        .hero,
+        .filters-panel {
+            background: rgba(255, 255, 255, 0.88);
+            border-radius: 32px;
+            padding: 32px;
+            box-shadow:
+                0 20px 50px rgba(0, 0, 0, 0.08),
+                0 8px 20px rgba(0, 0, 0, 0.05);
+            backdrop-filter: blur(12px);
+            margin-bottom: 24px;
+        }
 
-    async function loadApplications() {
-        applicationsContainer.innerHTML = '<p>Loading...</p>';
+        .hero-top {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            margin-bottom: 18px;
+        }
 
-        try {
-            const response = await fetch('/applications/');
+        .logo-box {
+            width: 84px;
+            height: 84px;
+            border-radius: 24px;
+            background: linear-gradient(180deg, #ffffff 0%, #f1f1f1 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.9),
+                0 10px 25px rgba(0, 0, 0, 0.12);
+            flex-shrink: 0;
+        }
 
-            if (!response.ok) {
-                throw new Error('Failed to load applications');
+        .logo-circle {
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            background: #111111;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: bold;
+            box-shadow:
+                inset 0 2px 6px rgba(255, 255, 255, 0.12),
+                0 6px 12px rgba(0, 0, 0, 0.25);
+        }
+
+        .hero h1 {
+            margin: 0;
+            font-size: 40px;
+            line-height: 1.1;
+        }
+
+        .hero p,
+        .panel-subtitle {
+            margin: 0;
+            font-size: 16px;
+            color: #555555;
+            max-width: 760px;
+        }
+
+        .actions {
+            margin-top: 26px;
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .main-button,
+        .secondary-button,
+        .filter-button,
+        .submit-button,
+        .modal-close-button,
+        .card-action-button,
+        .delete-button {
+            border: none;
+            padding: 14px 22px;
+            border-radius: 999px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .main-button,
+        .filter-button,
+        .submit-button,
+        .card-action-button {
+            background: #111111;
+            color: white;
+            box-shadow: 0 12px 22px rgba(0, 0, 0, 0.18);
+        }
+
+        .main-button:hover,
+        .filter-button:hover,
+        .submit-button:hover,
+        .card-action-button:hover {
+            background: #000000;
+        }
+
+        .secondary-button,
+        .modal-close-button {
+            border: 1px solid #d7d7db;
+            background: rgba(255, 255, 255, 0.8);
+            color: #111111;
+        }
+
+        .delete-button {
+            background: #ececef;
+            color: #111111;
+            border: 1px solid #d7d7db;
+        }
+
+        .delete-button:hover {
+            background: #dddddf;
+        }
+
+        .filters-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filters-title,
+        .modal-title,
+        .section-title {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .filters-subtitle {
+            margin: 4px 0 0;
+            color: #666666;
+            font-size: 14px;
+        }
+
+        .filters-grid,
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 14px;
+        }
+
+        .filter-group,
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-label,
+        .form-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #7a7a7a;
+            font-weight: 700;
+        }
+
+        .filter-input,
+        .filter-select,
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            border: 1px solid #dddddf;
+            background: #f7f7f8;
+            border-radius: 18px;
+            padding: 14px 16px;
+            font-size: 14px;
+            color: #111111;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .filter-select,
+        .form-select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            padding-right: 46px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%23111111' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            background-size: 16px;
+            cursor: pointer;
+        }
+
+        .filter-input:focus,
+        .filter-select:focus,
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            border-color: #111111;
+            background: white;
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+            font-family: Arial, sans-serif;
+        }
+
+        .filter-actions,
+        .form-actions,
+        .card-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .applications-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 18px;
+        }
+
+        .application-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 28px;
+            padding: 22px;
+            box-shadow:
+                0 16px 36px rgba(0, 0, 0, 0.08),
+                0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+        }
+
+        .application-card h3 {
+            margin: 0 0 8px;
+            font-size: 22px;
+            line-height: 1.2;
+        }
+
+        .company-name {
+            margin: 0 0 16px;
+            color: #666666;
+            font-size: 15px;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 14px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 18px;
+            border: 1px solid transparent;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .status-applied {
+            background: #f3f4f6;
+            color: #111111;
+            border-color: #e5e7eb;
+        }
+
+        .status-applied .status-dot {
+            background: #6b7280;
+        }
+
+        .status-interview {
+            background: #eff6ff;
+            color: #1d4ed8;
+            border-color: #bfdbfe;
+        }
+
+        .status-interview .status-dot {
+            background: #2563eb;
+        }
+
+        .status-offer {
+            background: #ecfdf3;
+            color: #157f3d;
+            border-color: #bbf7d0;
+        }
+
+        .status-offer .status-dot {
+            background: #16a34a;
+        }
+
+        .status-rejected {
+            background: #fef2f2;
+            color: #b42318;
+            border-color: #fecaca;
+        }
+
+        .status-rejected .status-dot {
+            background: #dc2626;
+        }
+
+        .status-closed {
+            background: #faf5ff;
+            color: #7c3aed;
+            border-color: #ddd6fe;
+        }
+
+        .status-closed .status-dot {
+            background: #8b5cf6;
+        }
+
+        .card-details {
+            display: grid;
+            gap: 10px;
+        }
+
+        .detail-row {
+            background: #f5f5f7;
+            border-radius: 16px;
+            padding: 12px 14px;
+        }
+
+        .detail-label {
+            display: block;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #7a7a7a;
+            margin-bottom: 4px;
+        }
+
+        .detail-value {
+            font-size: 15px;
+            color: #111111;
+            word-break: break-word;
+        }
+
+        .empty-box,
+        .message-box,
+        .form-message {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow:
+                0 16px 36px rgba(0, 0, 0, 0.08),
+                0 4px 12px rgba(0, 0, 0, 0.05);
+            color: #444444;
+        }
+
+        .form-message {
+            margin-top: 18px;
+            padding: 16px 18px;
+        }
+
+        .floating-create-button {
+            position: fixed;
+            left: 50%;
+            bottom: 26px;
+            transform: translateX(-50%);
+            width: 68px;
+            height: 68px;
+            border: none;
+            border-radius: 50%;
+            background: #111111;
+            color: white;
+            font-size: 34px;
+            font-weight: 400;
+            cursor: pointer;
+            box-shadow:
+                0 16px 36px rgba(0, 0, 0, 0.22),
+                0 6px 12px rgba(0, 0, 0, 0.12);
+            z-index: 1000;
+        }
+
+        .floating-create-button:hover {
+            background: #000000;
+        }
+
+        .modal-dialog {
+            width: min(760px, calc(100vw - 32px));
+            border: none;
+            padding: 0;
+            background: transparent;
+        }
+
+        .modal-dialog::backdrop {
+            background: rgba(17, 17, 17, 0.38);
+            backdrop-filter: blur(6px);
+        }
+
+        .dialog-card {
+            background: rgba(255, 255, 255, 0.96);
+            border-radius: 32px;
+            padding: 28px;
+            box-shadow:
+                0 24px 60px rgba(0, 0, 0, 0.14),
+                0 8px 24px rgba(0, 0, 0, 0.08);
+        }
+
+        .dialog-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .dialog-top-left {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        @media (max-width: 700px) {
+            .page {
+                padding-bottom: 120px;
             }
 
-            const data = await response.json();
-            const applications = data.applications;
+            .hero,
+            .filters-panel,
+            .dialog-card {
+                padding: 24px;
+                border-radius: 24px;
+            }
 
-            if (applications.length === 0) {
-                applicationsContainer.innerHTML = '<p>No applications found.</p>';
+            .hero-top {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .hero h1 {
+                font-size: 30px;
+            }
+
+            .logo-box {
+                width: 72px;
+                height: 72px;
+                border-radius: 20px;
+            }
+
+            .logo-circle {
+                width: 50px;
+                height: 50px;
+                font-size: 24px;
+            }
+
+            .application-card {
+                border-radius: 22px;
+            }
+
+            .floating-create-button {
+                width: 62px;
+                height: 62px;
+                font-size: 30px;
+                bottom: 20px;
+            }
+
+            .dialog-top {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <section class="hero">
+            <div class="hero-top">
+                <div class="logo-box">
+                    <div class="logo-circle">J</div>
+                </div>
+
+                <div>
+                    <h1>Job Tracker</h1>
+                    <p>
+                        A clean place to keep your job applications, track statuses,
+                        and review your progress in one minimal dashboard.
+                    </p>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button id="load-applications-button" class="main-button">Load applications</button>
+            </div>
+        </section>
+
+        <section class="filters-panel">
+            <div class="filters-header">
+                <div>
+                    <h2 class="filters-title">Filters</h2>
+                    <p class="filters-subtitle">Search by status, company, title, or date range.</p>
+                </div>
+            </div>
+
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label class="filter-label" for="status-filter">Status</label>
+                    <select id="status-filter" class="filter-select">
+                        <option value="">All statuses</option>
+                        <option value="applied">Applied</option>
+                        <option value="interview">Interview</option>
+                        <option value="offer">Offer</option>
+                        <option value="rejected">Rejected</option>
+                        <option value="closed">Closed</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label" for="company-filter">Company</label>
+                    <input id="company-filter" class="filter-input" type="text" placeholder="Spotify">
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label" for="title-filter">Title</label>
+                    <input id="title-filter" class="filter-input" type="text" placeholder="Backend Developer">
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label" for="date-from-filter">Date from</label>
+                    <input id="date-from-filter" class="filter-input" type="date">
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label" for="date-to-filter">Date to</label>
+                    <input id="date-to-filter" class="filter-input" type="date">
+                </div>
+            </div>
+
+            <div class="filter-actions">
+                <button id="apply-filters-button" class="filter-button">Apply filters</button>
+                <button id="reset-filters-button" class="secondary-button">Reset filters</button>
+            </div>
+        </section>
+
+        <section>
+            <h2 class="section-title">Applications</h2>
+            <div id="applications-container" class="message-box">
+                Press “Load applications” or apply filters to show your saved job applications.
+            </div>
+        </section>
+    </div>
+
+    <button id="open-create-dialog-button" class="floating-create-button" aria-label="Create application">+</button>
+
+    <dialog id="create-dialog" class="modal-dialog">
+        <div class="dialog-card">
+            <div class="dialog-top">
+                <div class="dialog-top-left">
+                    <h2 class="modal-title">Create application</h2>
+                    <p class="panel-subtitle">Add a new job application in the same minimal style.</p>
+                </div>
+
+                <button id="close-create-dialog-button" class="modal-close-button" type="button">Close</button>
+            </div>
+
+            <form id="create-application-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label" for="create-title">Title</label>
+                        <input id="create-title" class="form-input" type="text" placeholder="Backend Developer" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="create-company">Company</label>
+                        <input id="create-company" class="form-input" type="text" placeholder="Spotify" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="create-status">Status</label>
+                        <select id="create-status" class="form-select" required>
+                            <option value="applied">Applied</option>
+                            <option value="interview">Interview</option>
+                            <option value="offer">Offer</option>
+                            <option value="rejected">Rejected</option>
+                            <option value="closed">Closed</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="create-date-applied">Date applied</label>
+                        <input id="create-date-applied" class="form-input" type="date">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="create-location">Location</label>
+                        <input id="create-location" class="form-input" type="text" placeholder="Berlin">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="create-salary">Salary</label>
+                        <input id="create-salary" class="form-input" type="text" placeholder="4000 EUR">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="create-job-link">Job link</label>
+                        <input id="create-job-link" class="form-input" type="url" placeholder="https://example.com/job">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="create-contact-name">Contact name</label>
+                        <input id="create-contact-name" class="form-input" type="text" placeholder="John Recruiter">
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 14px;">
+                    <label class="form-label" for="create-notes">Notes</label>
+                    <textarea id="create-notes" class="form-textarea" placeholder="Applied through LinkedIn, waiting for reply..."></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="submit-button">Create application</button>
+                    <button type="button" id="clear-form-button" class="secondary-button">Clear form</button>
+                </div>
+            </form>
+
+            <div id="form-message" style="display: none;"></div>
+        </div>
+    </dialog>
+
+    <dialog id="edit-dialog" class="modal-dialog">
+        <div class="dialog-card">
+            <div class="dialog-top">
+                <div class="dialog-top-left">
+                    <h2 class="modal-title">Edit application</h2>
+                    <p class="panel-subtitle">Update an existing job application.</p>
+                </div>
+
+                <button id="close-edit-dialog-button" class="modal-close-button" type="button">Close</button>
+            </div>
+
+            <form id="edit-application-form">
+                <input id="edit-id" type="hidden">
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label" for="edit-title">Title</label>
+                        <input id="edit-title" class="form-input" type="text" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="edit-company">Company</label>
+                        <input id="edit-company" class="form-input" type="text" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="edit-status">Status</label>
+                        <select id="edit-status" class="form-select" required>
+                            <option value="applied">Applied</option>
+                            <option value="interview">Interview</option>
+                            <option value="offer">Offer</option>
+                            <option value="rejected">Rejected</option>
+                            <option value="closed">Closed</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="edit-date-applied">Date applied</label>
+                        <input id="edit-date-applied" class="form-input" type="date">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="edit-location">Location</label>
+                        <input id="edit-location" class="form-input" type="text">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="edit-salary">Salary</label>
+                        <input id="edit-salary" class="form-input" type="text">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="edit-job-link">Job link</label>
+                        <input id="edit-job-link" class="form-input" type="url">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="edit-contact-name">Contact name</label>
+                        <input id="edit-contact-name" class="form-input" type="text">
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 14px;">
+                    <label class="form-label" for="edit-notes">Notes</label>
+                    <textarea id="edit-notes" class="form-textarea"></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="submit-button">Save changes</button>
+                </div>
+            </form>
+
+            <div id="edit-form-message" style="display: none;"></div>
+        </div>
+    </dialog>
+
+    <script>
+        const loadApplicationsButton = document.getElementById('load-applications-button');
+        const applyFiltersButton = document.getElementById('apply-filters-button');
+        const resetFiltersButton = document.getElementById('reset-filters-button');
+
+        const applicationsContainer = document.getElementById('applications-container');
+
+        const statusFilter = document.getElementById('status-filter');
+        const companyFilter = document.getElementById('company-filter');
+        const titleFilter = document.getElementById('title-filter');
+        const dateFromFilter = document.getElementById('date-from-filter');
+        const dateToFilter = document.getElementById('date-to-filter');
+
+        const openCreateDialogButton = document.getElementById('open-create-dialog-button');
+        const closeCreateDialogButton = document.getElementById('close-create-dialog-button');
+        const createDialog = document.getElementById('create-dialog');
+
+        const createApplicationForm = document.getElementById('create-application-form');
+        const clearFormButton = document.getElementById('clear-form-button');
+        const formMessage = document.getElementById('form-message');
+
+        const createTitle = document.getElementById('create-title');
+        const createCompany = document.getElementById('create-company');
+        const createStatus = document.getElementById('create-status');
+        const createDateApplied = document.getElementById('create-date-applied');
+        const createLocation = document.getElementById('create-location');
+        const createSalary = document.getElementById('create-salary');
+        const createJobLink = document.getElementById('create-job-link');
+        const createContactName = document.getElementById('create-contact-name');
+        const createNotes = document.getElementById('create-notes');
+
+        const editDialog = document.getElementById('edit-dialog');
+        const closeEditDialogButton = document.getElementById('close-edit-dialog-button');
+        const editApplicationForm = document.getElementById('edit-application-form');
+        const editFormMessage = document.getElementById('edit-form-message');
+
+        const editId = document.getElementById('edit-id');
+        const editTitle = document.getElementById('edit-title');
+        const editCompany = document.getElementById('edit-company');
+        const editStatus = document.getElementById('edit-status');
+        const editDateApplied = document.getElementById('edit-date-applied');
+        const editLocation = document.getElementById('edit-location');
+        const editSalary = document.getElementById('edit-salary');
+        const editJobLink = document.getElementById('edit-job-link');
+        const editContactName = document.getElementById('edit-contact-name');
+        const editNotes = document.getElementById('edit-notes');
+
+        function normalizeDateValue(value) {
+            if (!value) {
+                return '';
+            }
+            return String(value).slice(0, 10);
+        }
+
+        function escapeHtml(value) {
+            if (value === null || value === undefined) {
+                return '';
+            }
+
+            return String(value)
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#39;');
+        }
+
+        async function loadApplications() {
+            applicationsContainer.className = 'message-box';
+            applicationsContainer.innerHTML = '<p>Loading applications...</p>';
+
+            try {
+                const params = new URLSearchParams();
+
+                if (statusFilter.value) {
+                    params.append('status', statusFilter.value);
+                }
+
+                if (companyFilter.value) {
+                    params.append('company', companyFilter.value);
+                }
+
+                if (titleFilter.value) {
+                    params.append('title', titleFilter.value);
+                }
+
+                if (dateFromFilter.value) {
+                    params.append('date_applied_from', dateFromFilter.value);
+                }
+
+                if (dateToFilter.value) {
+                    params.append('date_applied_to', dateToFilter.value);
+                }
+
+                let url = '/applications/';
+
+                if (params.toString()) {
+                    url += '?' + params.toString();
+                }
+
+                const response = await fetch(url);
+
+                if (!response.ok) {
+                    throw new Error('Failed to load applications');
+                }
+
+                const data = await response.json();
+                const applications = data.applications;
+
+                if (applications.length === 0) {
+                    applicationsContainer.className = 'empty-box';
+                    applicationsContainer.innerHTML = '<p>No applications found for these filters.</p>';
+                    return;
+                }
+
+                let html = '<div class="applications-grid">';
+
+                for (const application of applications) {
+                    const safeTitle = escapeHtml(application.title || 'No title');
+                    const safeCompany = escapeHtml(application.company || 'No company');
+                    const safeStatus = escapeHtml(application.status || 'No status');
+                    const safeLocation = escapeHtml(application.location || 'Not specified');
+                    const safeSalary = escapeHtml(application.salary || 'Not specified');
+                    const safeDateApplied = escapeHtml(application.date_applied || 'Not specified');
+                    const safeContactName = escapeHtml(application.contact_name || 'Not specified');
+                    const safeNotes = escapeHtml(application.notes || 'No notes yet');
+                    const safeJobLink = escapeHtml(application.job_link || '');
+
+                    const statusClassMap = {
+                        applied: 'status-applied',
+                        interview: 'status-interview',
+                        offer: 'status-offer',
+                        rejected: 'status-rejected',
+                        closed: 'status-closed'
+                    };
+
+                    const statusLabelMap = {
+                        applied: 'Applied',
+                        interview: 'Interview',
+                        offer: 'Offer',
+                        rejected: 'Rejected',
+                        closed: 'Closed'
+                    };
+
+                    const statusClass = statusClassMap[application.status] || 'status-applied';
+                    const statusLabel = statusLabelMap[application.status] || safeStatus;
+
+                    html += `
+                        <article class="application-card">
+                            <h3>${safeTitle}</h3>
+                            <p class="company-name">${safeCompany}</p>
+
+                            <div class="status-badge ${statusClass}">
+                                <span class="status-dot"></span>
+                                <span>${statusLabel}</span>
+                            </div>
+
+                            <div class="card-details">
+                                <div class="detail-row">
+                                    <span class="detail-label">Location</span>
+                                    <span class="detail-value">${safeLocation}</span>
+                                </div>
+
+                                <div class="detail-row">
+                                    <span class="detail-label">Salary</span>
+                                    <span class="detail-value">${safeSalary}</span>
+                                </div>
+
+                                <div class="detail-row">
+                                    <span class="detail-label">Date applied</span>
+                                    <span class="detail-value">${safeDateApplied}</span>
+                                </div>
+
+                                <div class="detail-row">
+                                    <span class="detail-label">Contact</span>
+                                    <span class="detail-value">${safeContactName}</span>
+                                </div>
+
+                                <div class="detail-row">
+                                    <span class="detail-label">Notes</span>
+                                    <span class="detail-value">${safeNotes}</span>
+                                </div>
+
+                                <div class="detail-row">
+                                    <span class="detail-label">Job link</span>
+                                    <span class="detail-value">${safeJobLink || 'Not specified'}</span>
+                                </div>
+                            </div>
+
+                            <div class="card-actions">
+                                <button
+                                    type="button"
+                                    class="card-action-button"
+                                    onclick='openEditDialog(${JSON.stringify(application)})'
+                                >
+                                    Edit
+                                </button>
+
+                                <button
+                                    type="button"
+                                    class="delete-button"
+                                    onclick="deleteApplication(${application.id})"
+                                >
+                                    Delete
+                                </button>
+                            </div>
+                        </article>
+                    `;
+                }
+
+                html += '</div>';
+                applicationsContainer.className = '';
+                applicationsContainer.innerHTML = html;
+            } catch (error) {
+                applicationsContainer.className = 'message-box';
+                applicationsContainer.innerHTML = '<p>Error loading applications.</p>';
+            }
+        }
+
+        function resetFilters() {
+            statusFilter.value = '';
+            companyFilter.value = '';
+            titleFilter.value = '';
+            dateFromFilter.value = '';
+            dateToFilter.value = '';
+            loadApplications();
+        }
+
+        function clearCreateForm() {
+            createApplicationForm.reset();
+            formMessage.style.display = 'none';
+            formMessage.innerHTML = '';
+        }
+
+        function showCreateFormMessage(message) {
+            formMessage.style.display = 'block';
+            formMessage.className = 'form-message';
+            formMessage.innerHTML = `<p>${message}</p>`;
+        }
+
+        function showEditFormMessage(message) {
+            editFormMessage.style.display = 'block';
+            editFormMessage.className = 'form-message';
+            editFormMessage.innerHTML = `<p>${message}</p>`;
+        }
+
+        async function createApplication(event) {
+            event.preventDefault();
+
+            const payload = {
+                title: createTitle.value,
+                company: createCompany.value,
+                status: createStatus.value,
+                date_applied: createDateApplied.value,
+                location: createLocation.value,
+                salary: createSalary.value,
+                job_link: createJobLink.value,
+                contact_name: createContactName.value,
+                notes: createNotes.value
+            };
+
+            try {
+                const response = await fetch('/applications/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to create application');
+                }
+
+                clearCreateForm();
+                showCreateFormMessage('Application created successfully.');
+                loadApplications();
+
+                setTimeout(() => {
+                    createDialog.close();
+                    formMessage.style.display = 'none';
+                }, 700);
+            } catch (error) {
+                showCreateFormMessage('Error creating application.');
+            }
+        }
+
+        function openCreateDialog() {
+            createDialog.showModal();
+        }
+
+        function closeCreateDialog() {
+            createDialog.close();
+            formMessage.style.display = 'none';
+        }
+
+        function openEditDialog(application) {
+            editId.value = application.id;
+            editTitle.value = application.title || '';
+            editCompany.value = application.company || '';
+            editStatus.value = application.status || 'applied';
+            editDateApplied.value = normalizeDateValue(application.date_applied);
+            editLocation.value = application.location || '';
+            editSalary.value = application.salary || '';
+            editJobLink.value = application.job_link || '';
+            editContactName.value = application.contact_name || '';
+            editNotes.value = application.notes || '';
+
+            editFormMessage.style.display = 'none';
+            editFormMessage.innerHTML = '';
+
+            editDialog.showModal();
+        }
+
+        function closeEditDialog() {
+            editDialog.close();
+            editFormMessage.style.display = 'none';
+        }
+
+        async function updateApplication(event) {
+            event.preventDefault();
+
+            const applicationId = editId.value;
+
+            const payload = {
+                title: editTitle.value,
+                company: editCompany.value,
+                status: editStatus.value,
+                date_applied: editDateApplied.value,
+                location: editLocation.value,
+                salary: editSalary.value,
+                job_link: editJobLink.value,
+                contact_name: editContactName.value,
+                notes: editNotes.value
+            };
+
+            try {
+                const response = await fetch(`/applications/${applicationId}/`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to update application');
+                }
+
+                showEditFormMessage('Application updated successfully.');
+                loadApplications();
+
+                setTimeout(() => {
+                    closeEditDialog();
+                }, 700);
+            } catch (error) {
+                showEditFormMessage('Error updating application.');
+            }
+        }
+
+        async function deleteApplication(applicationId) {
+            const confirmed = window.confirm('Delete this application?');
+
+            if (!confirmed) {
                 return;
             }
 
-            let html = '';
+            try {
+                const response = await fetch(`/applications/${applicationId}/`, {
+                    method: 'DELETE'
+                });
 
-            for (const application of applications) {
-                html += `
-                    <div>
-                        <h3>${application.title}</h3>
-                        <p><strong>Company:</strong> ${application.company}</p>
-                        <p><strong>Status:</strong> ${application.status}</p>
-                        <p><strong>Location:</strong> ${application.location}</p>
-                        <p><strong>Salary:</strong> ${application.salary}</p>
-                        <p><strong>Date applied:</strong> ${application.date_applied}</p>
-                        <hr>
-                    </div>
-                `;
+                if (!response.ok && response.status !== 204) {
+                    throw new Error('Failed to delete application');
+                }
+
+                loadApplications();
+            } catch (error) {
+                applicationsContainer.className = 'message-box';
+                applicationsContainer.innerHTML = '<p>Error deleting application.</p>';
             }
-
-            applicationsContainer.innerHTML = html;
-        } catch (error) {
-            applicationsContainer.innerHTML = '<p>Error loading applications.</p>';
         }
-    }
 
-    loadApplicationsButton.addEventListener('click', loadApplications);
-</script>
+        window.openEditDialog = openEditDialog;
+        window.deleteApplication = deleteApplication;
+
+        loadApplicationsButton.addEventListener('click', loadApplications);
+        applyFiltersButton.addEventListener('click', loadApplications);
+        resetFiltersButton.addEventListener('click', resetFilters);
+
+        openCreateDialogButton.addEventListener('click', openCreateDialog);
+        closeCreateDialogButton.addEventListener('click', closeCreateDialog);
+        closeEditDialogButton.addEventListener('click', closeEditDialog);
+
+        createApplicationForm.addEventListener('submit', createApplication);
+        clearFormButton.addEventListener('click', clearCreateForm);
+        editApplicationForm.addEventListener('submit', updateApplication);
+    </script>
 </body>
 </html>
