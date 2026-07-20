@@ -2,6 +2,14 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    path('', views.landing_page, name='landing'),
+
+    path('login/', views.login_page, name='login_page'),
+    path('register/', views.register_page, name='register_page'),
+    path('dashboard/', views.dashboard_page, name='dashboard_page'),
+    path('applications-page/', views.applications_page, name='applications_page'),
+    path('filters/', views.filters_page, name='filters_page'),
+    path('profile/', views.profile_page, name='profile_page'),
 
     path('job-tracker/', views.job_tracker_page, name='job_tracker'),
 
@@ -13,9 +21,6 @@ urlpatterns = [
     path('applications/', views.application_home, name='application_home'),
     path('applications/<int:id>/', views.application_detail, name='application_detail'),
 
-    path('', views.user_home, name='user_home'),
-    path('<int:id>/', views.user_detail, name='user_detail'),
-
-
-
+    path('users/', views.user_home, name='user_home'),
+    path('users/<int:id>/', views.user_detail, name='user_detail'),
 ]

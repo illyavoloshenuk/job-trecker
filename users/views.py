@@ -431,3 +431,30 @@ def application_detail(request, id):
         {'error': 'Method not allowed'},
         status=405,
     )
+
+def landing_page(request):
+    return render(request, 'landing.html')
+
+
+def login_page(request):
+    return render(request, 'login.html')
+
+
+def register_page(request):
+    return render(request, 'register.html')
+
+
+def dashboard_page(request):
+    return render(request, 'dashboard.html')
+
+
+def applications_page(request):
+    return render(request, 'applications.html')
+
+
+def filters_page(request):
+    return render(request, 'filters.html')
+
+
+def profile_page(request):
+    return render(request, 'profile.html')

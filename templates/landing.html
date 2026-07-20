@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Tracker</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #f4f4f5;
+            --bg-soft: #ececef;
+            --card: rgba(255, 255, 255, 0.88);
+            --text: #111111;
+            --muted: #5f5f66;
+            --border: #d9d9de;
+            --shadow: 0 20px 50px rgba(0, 0, 0, 0.08), 0 8px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            color: var(--text);
+            background: linear-gradient(180deg, #f4f4f5 0%, #e9e9ec 100%);
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .page {
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1180px;
+            margin: 0 auto;
+        }
+
+        .site-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 18px 0 26px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .logo-box {
+            width: 64px;
+            height: 64px;
+            border-radius: 20px;
+            background: linear-gradient(180deg, #ffffff 0%, #f1f1f1 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.9),
+                0 10px 25px rgba(0, 0, 0, 0.12);
+            flex-shrink: 0;
+        }
+
+        .logo-circle {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: #111111;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .brand-text h1 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .brand-text p {
+            margin: 4px 0 0;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .primary-button,
+        .secondary-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 48px;
+            padding: 12px 20px;
+            border-radius: 999px;
+            font-size: 15px;
+            font-weight: 700;
+            border: 1px solid transparent;
+            cursor: pointer;
+        }
+
+        .primary-button {
+            background: #111111;
+            color: white;
+            box-shadow: 0 12px 22px rgba(0, 0, 0, 0.18);
+        }
+
+        .secondary-button {
+            background: rgba(255, 255, 255, 0.82);
+            color: #111111;
+            border-color: var(--border);
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 24px;
+            align-items: stretch;
+            margin-bottom: 24px;
+        }
+
+        .hero-card,
+        .info-card,
+        .steps-card {
+            background: var(--card);
+            border-radius: 32px;
+            padding: 32px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(12px);
+        }
+
+        .hero-card h2 {
+            margin: 0 0 16px;
+            font-size: 48px;
+            line-height: 1.05;
+            max-width: 12ch;
+        }
+
+        .hero-card p {
+            margin: 0;
+            font-size: 17px;
+            line-height: 1.7;
+            color: var(--muted);
+            max-width: 60ch;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            margin-top: 28px;
+            margin-bottom: 24px;
+        }
+
+        .hero-note {
+            margin-top: 0;
+            font-size: 14px;
+            color: #6b6b72;
+        }
+
+        .stats-grid {
+            display: grid;
+            gap: 14px;
+            height: 100%;
+        }
+
+        .stat-box {
+            background: #f7f7f8;
+            border: 1px solid #e1e1e6;
+            border-radius: 24px;
+            padding: 20px;
+        }
+
+        .stat-label {
+            display: block;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #7a7a7a;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .stat-value {
+            display: block;
+            font-size: 30px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .stat-text {
+            margin: 0;
+            font-size: 14px;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        .sections-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 24px;
+        }
+
+        .info-card h3,
+        .steps-card h3 {
+            margin: 0 0 12px;
+            font-size: 26px;
+        }
+
+        .info-card p,
+        .steps-card p {
+            margin: 0 0 18px;
+            color: var(--muted);
+            line-height: 1.7;
+        }
+
+        .feature-list,
+        .step-list {
+            display: grid;
+            gap: 14px;
+        }
+
+        .feature-item,
+        .step-item {
+            background: #f7f7f8;
+            border: 1px solid #e2e2e7;
+            border-radius: 22px;
+            padding: 18px;
+        }
+
+        .feature-item strong,
+        .step-item strong {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+
+        .feature-item span,
+        .step-item span {
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .footer-box {
+            margin-top: 24px;
+            background: rgba(17, 17, 17, 0.96);
+            color: white;
+            border-radius: 32px;
+            padding: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .footer-box h3 {
+            margin: 0 0 8px;
+            font-size: 26px;
+        }
+
+        .footer-box p {
+            margin: 0;
+            color: rgba(255, 255, 255, 0.76);
+            line-height: 1.7;
+            max-width: 58ch;
+        }
+
+        .footer-box .secondary-button {
+            background: white;
+            border-color: white;
+        }
+
+        @media (max-width: 960px) {
+            .hero,
+            .sections-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-card h2 {
+                font-size: 40px;
+                max-width: 14ch;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .page {
+                padding: 16px;
+            }
+
+            .site-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .brand {
+                align-items: flex-start;
+            }
+
+            .header-actions,
+            .hero-actions {
+                flex-direction: column;
+            }
+
+            .primary-button,
+            .secondary-button {
+                width: 100%;
+            }
+
+            .hero-card,
+            .info-card,
+            .steps-card,
+            .footer-box {
+                padding: 24px;
+                border-radius: 24px;
+            }
+
+            .hero-card h2 {
+                font-size: 32px;
+            }
+
+            .stat-value {
+                font-size: 26px;
+            }
+
+            .info-card h3,
+            .steps-card h3,
+            .footer-box h3 {
+                font-size: 22px;
+            }
+
+            .logo-box {
+                width: 56px;
+                height: 56px;
+                border-radius: 18px;
+            }
+
+            .logo-circle {
+                width: 38px;
+                height: 38px;
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="container">
+            <header class="site-header">
+                <div class="brand">
+                    <div class="logo-box">
+                        <div class="logo-circle">J</div>
+                    </div>
+
+                    <div class="brand-text">
+                        <h1>Job Tracker</h1>
+                        <p>Track every application in one organized place.</p>
+                    </div>
+                </div>
+
+                <div class="header-actions">
+                    <a href="/login/" class="secondary-button">Login</a>
+                    <a href="/register/" class="primary-button">Register</a>
+                </div>
+            </header>
+
+            <section class="hero">
+                <div class="hero-card">
+                    <h2>Keep every job application clear and easy to manage.</h2>
+                    <p>
+                        Job Tracker helps you save the jobs you apply for, follow each status,
+                        keep notes, and search your applications later without losing track
+                        of where you already sent your CV.
+                    </p>
+
+                    <div class="hero-actions">
+                        <a href="/register/" class="primary-button">Create account</a>
+                    </div>
+
+                    <p class="hero-note">
+                        You can explore this page without logging in. Your private application data
+                        appears only after you sign in.
+                    </p>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <span class="stat-label">What you can store</span>
+                        <span class="stat-value">Title + company</span>
+                        <p class="stat-text">Save the role, company name, date, link, salary, contact person, and your own notes.</p>
+                    </div>
+
+                    <div class="stat-box">
+                        <span class="stat-label">What you can track</span>
+                        <span class="stat-value">5 statuses</span>
+                        <p class="stat-text">Applied, interview, offer, rejected, and closed — so you can see progress fast.</p>
+                    </div>
+
+                    <div class="stat-box">
+                        <span class="stat-label">What happens after login</span>
+                        <span class="stat-value">Your own space</span>
+                        <p class="stat-text">Each user sees only their own applications, which keeps the dashboard personal and clean.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="sections-grid">
+                <div class="info-card">
+                    <h3>Why this site exists</h3>
+                    <p>
+                        When you apply to many jobs, it becomes hard to remember where you applied,
+                        what happened next, and what you want to follow up on. This site gives you
+                        one calm place for all of that.
+                    </p>
+
+                    <div class="feature-list">
+                        <div class="feature-item">
+                            <strong>Save each application</strong>
+                            <span>Keep job title, company, date, location, salary, contact name, link, and notes together.</span>
+                        </div>
+
+                        <div class="feature-item">
+                            <strong>See your progress</strong>
+                            <span>Update the application status as things change, so you always know what is active.</span>
+                        </div>
+
+                        <div class="feature-item">
+                            <strong>Search later</strong>
+                            <span>Use filters to quickly find an old application when you need it again.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="steps-card">
+                    <h3>How it works</h3>
+                    <p>
+                        The idea is simple. First you create an account, then you save your job applications,
+                        and later you come back to update, search, or review them.
+                    </p>
+
+                    <div class="step-list">
+                        <div class="step-item">
+                            <strong>Step 1 — Create your account</strong>
+                            <span>Register with username, email, and password to get your own private dashboard.</span>
+                        </div>
+
+                        <div class="step-item">
+                            <strong>Step 2 — Add applications</strong>
+                            <span>Create entries for every company you applied to and keep useful details in notes.</span>
+                        </div>
+
+                        <div class="step-item">
+                            <strong>Step 3 — Filter and manage</strong>
+                            <span>Later you can filter by status, company, title, or date range to find exactly what you need.</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="footer-box">
+                <div>
+                    <h3>Start building your job search memory.</h3>
+                    <p>
+                        Make your applications easier to track from phone, tablet, or computer with one clean and responsive workspace.
+                    </p>
+                </div>
+
+                <a href="/register/" class="secondary-button">Get started</a>
+            </section>
+        </div>
+    </div>
+</body>
+</html>
