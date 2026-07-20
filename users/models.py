@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 class UserProfile(models.Model):
     name = models.CharField(max_length=100)
@@ -12,6 +13,13 @@ class JobApplication(models.Model):
         REJECTED = 'rejected', 'Rejected'
         CLOSED = 'closed', 'Closed'
 
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='job_applications',
+        null=True,
+        blank=True
+    )
     title = models.CharField(max_length=255)
     company = models.CharField(max_length=255)
     status = models.CharField(

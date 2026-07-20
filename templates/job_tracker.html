@@ -506,8 +506,13 @@
             </div>
 
             <div class="actions">
-                <button id="load-applications-button" class="main-button">Load applications</button>
+                <button id="load-applications-button" class="main-button" type="button">Load applications</button>
+                <button id="open-login-dialog-button" class="secondary-button" type="button">Login</button>
+                <button id="open-register-dialog-button" class="secondary-button" type="button">Register</button>
+                <button id="logout-button" class="secondary-button" type="button" style="display: none;">Logout</button>
             </div>
+
+            <div id="auth-user-box" class="form-message" style="display: none; margin-top: 18px;"></div>
         </section>
 
         <section class="filters-panel">
@@ -553,8 +558,8 @@
             </div>
 
             <div class="filter-actions">
-                <button id="apply-filters-button" class="filter-button">Apply filters</button>
-                <button id="reset-filters-button" class="secondary-button">Reset filters</button>
+                <button id="apply-filters-button" class="filter-button" type="button">Apply filters</button>
+                <button id="reset-filters-button" class="secondary-button" type="button">Reset filters</button>
             </div>
         </section>
 
@@ -566,7 +571,7 @@
         </section>
     </div>
 
-    <button id="open-create-dialog-button" class="floating-create-button" aria-label="Create application">+</button>
+    <button id="open-create-dialog-button" class="floating-create-button" aria-label="Create application" type="button">+</button>
 
     <dialog id="create-dialog" class="modal-dialog">
         <div class="dialog-card">
@@ -719,403 +724,655 @@
         </div>
     </dialog>
 
+    <dialog id="login-dialog" class="modal-dialog">
+        <div class="dialog-card">
+            <div class="dialog-top">
+                <div class="dialog-top-left">
+                    <h2 class="modal-title">Login</h2>
+                    <p class="panel-subtitle">Sign in to your account.</p>
+                </div>
+
+                <button id="close-login-dialog-button" class="modal-close-button" type="button">Close</button>
+            </div>
+
+            <form id="login-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label" for="login-username">Username</label>
+                        <input id="login-username" class="form-input" type="text" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="login-password">Password</label>
+                        <input id="login-password" class="form-input" type="password" required>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="submit-button">Login</button>
+                </div>
+            </form>
+
+            <div id="login-message" style="display: none;"></div>
+        </div>
+    </dialog>
+
+    <dialog id="register-dialog" class="modal-dialog">
+        <div class="dialog-card">
+            <div class="dialog-top">
+                <div class="dialog-top-left">
+                    <h2 class="modal-title">Register</h2>
+                    <p class="panel-subtitle">Create a new account.</p>
+                </div>
+
+                <button id="close-register-dialog-button" class="modal-close-button" type="button">Close</button>
+            </div>
+
+            <form id="register-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label" for="register-username">Username</label>
+                        <input id="register-username" class="form-input" type="text" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="register-email">Email</label>
+                        <input id="register-email" class="form-input" type="email">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="register-password">Password</label>
+                        <input id="register-password" class="form-input" type="password" required>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="submit-button">Register</button>
+                </div>
+            </form>
+
+            <div id="register-message" style="display: none;"></div>
+        </div>
+    </dialog>
+
     <script>
-        const loadApplicationsButton = document.getElementById('load-applications-button');
-        const applyFiltersButton = document.getElementById('apply-filters-button');
-        const resetFiltersButton = document.getElementById('reset-filters-button');
+const loadApplicationsButton = document.getElementById('load-applications-button');
+const applyFiltersButton = document.getElementById('apply-filters-button');
+const resetFiltersButton = document.getElementById('reset-filters-button');
+const applicationsContainer = document.getElementById('applications-container');
 
-        const applicationsContainer = document.getElementById('applications-container');
+const statusFilter = document.getElementById('status-filter');
+const companyFilter = document.getElementById('company-filter');
+const titleFilter = document.getElementById('title-filter');
+const dateFromFilter = document.getElementById('date-from-filter');
+const dateToFilter = document.getElementById('date-to-filter');
 
-        const statusFilter = document.getElementById('status-filter');
-        const companyFilter = document.getElementById('company-filter');
-        const titleFilter = document.getElementById('title-filter');
-        const dateFromFilter = document.getElementById('date-from-filter');
-        const dateToFilter = document.getElementById('date-to-filter');
+const openCreateDialogButton = document.getElementById('open-create-dialog-button');
+const closeCreateDialogButton = document.getElementById('close-create-dialog-button');
+const createDialog = document.getElementById('create-dialog');
+const createApplicationForm = document.getElementById('create-application-form');
+const clearFormButton = document.getElementById('clear-form-button');
+const formMessage = document.getElementById('form-message');
 
-        const openCreateDialogButton = document.getElementById('open-create-dialog-button');
-        const closeCreateDialogButton = document.getElementById('close-create-dialog-button');
-        const createDialog = document.getElementById('create-dialog');
+const createTitle = document.getElementById('create-title');
+const createCompany = document.getElementById('create-company');
+const createStatus = document.getElementById('create-status');
+const createDateApplied = document.getElementById('create-date-applied');
+const createLocation = document.getElementById('create-location');
+const createSalary = document.getElementById('create-salary');
+const createJobLink = document.getElementById('create-job-link');
+const createContactName = document.getElementById('create-contact-name');
+const createNotes = document.getElementById('create-notes');
 
-        const createApplicationForm = document.getElementById('create-application-form');
-        const clearFormButton = document.getElementById('clear-form-button');
-        const formMessage = document.getElementById('form-message');
+const editDialog = document.getElementById('edit-dialog');
+const closeEditDialogButton = document.getElementById('close-edit-dialog-button');
+const editApplicationForm = document.getElementById('edit-application-form');
+const editFormMessage = document.getElementById('edit-form-message');
 
-        const createTitle = document.getElementById('create-title');
-        const createCompany = document.getElementById('create-company');
-        const createStatus = document.getElementById('create-status');
-        const createDateApplied = document.getElementById('create-date-applied');
-        const createLocation = document.getElementById('create-location');
-        const createSalary = document.getElementById('create-salary');
-        const createJobLink = document.getElementById('create-job-link');
-        const createContactName = document.getElementById('create-contact-name');
-        const createNotes = document.getElementById('create-notes');
+const editId = document.getElementById('edit-id');
+const editTitle = document.getElementById('edit-title');
+const editCompany = document.getElementById('edit-company');
+const editStatus = document.getElementById('edit-status');
+const editDateApplied = document.getElementById('edit-date-applied');
+const editLocation = document.getElementById('edit-location');
+const editSalary = document.getElementById('edit-salary');
+const editJobLink = document.getElementById('edit-job-link');
+const editContactName = document.getElementById('edit-contact-name');
+const editNotes = document.getElementById('edit-notes');
 
-        const editDialog = document.getElementById('edit-dialog');
-        const closeEditDialogButton = document.getElementById('close-edit-dialog-button');
-        const editApplicationForm = document.getElementById('edit-application-form');
-        const editFormMessage = document.getElementById('edit-form-message');
+const openLoginDialogButton = document.getElementById('open-login-dialog-button');
+const openRegisterDialogButton = document.getElementById('open-register-dialog-button');
+const logoutButton = document.getElementById('logout-button');
+const authUserBox = document.getElementById('auth-user-box');
 
-        const editId = document.getElementById('edit-id');
-        const editTitle = document.getElementById('edit-title');
-        const editCompany = document.getElementById('edit-company');
-        const editStatus = document.getElementById('edit-status');
-        const editDateApplied = document.getElementById('edit-date-applied');
-        const editLocation = document.getElementById('edit-location');
-        const editSalary = document.getElementById('edit-salary');
-        const editJobLink = document.getElementById('edit-job-link');
-        const editContactName = document.getElementById('edit-contact-name');
-        const editNotes = document.getElementById('edit-notes');
+const loginDialog = document.getElementById('login-dialog');
+const registerDialog = document.getElementById('register-dialog');
+const closeLoginDialogButton = document.getElementById('close-login-dialog-button');
+const closeRegisterDialogButton = document.getElementById('close-register-dialog-button');
 
-        function normalizeDateValue(value) {
-            if (!value) {
-                return '';
-            }
-            return String(value).slice(0, 10);
+const loginForm = document.getElementById('login-form');
+const registerForm = document.getElementById('register-form');
+const loginMessage = document.getElementById('login-message');
+const registerMessage = document.getElementById('register-message');
+
+const loginUsername = document.getElementById('login-username');
+const loginPassword = document.getElementById('login-password');
+const registerUsername = document.getElementById('register-username');
+const registerEmail = document.getElementById('register-email');
+const registerPassword = document.getElementById('register-password');
+
+function normalizeDateValue(value) {
+    if (!value) return '';
+    return String(value).slice(0, 10);
+}
+
+function escapeHtml(value) {
+    if (value === null || value === undefined) return '';
+    return String(value)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+}
+
+function showCreateFormMessage(message) {
+    formMessage.style.display = 'block';
+    formMessage.className = 'form-message';
+    formMessage.innerHTML = `<p>${message}</p>`;
+}
+
+function showEditFormMessage(message) {
+    editFormMessage.style.display = 'block';
+    editFormMessage.className = 'form-message';
+    editFormMessage.innerHTML = `<p>${message}</p>`;
+}
+
+function showLoginMessage(message) {
+    loginMessage.style.display = 'block';
+    loginMessage.className = 'form-message';
+    loginMessage.innerHTML = `<p>${message}</p>`;
+}
+
+function showRegisterMessage(message) {
+    registerMessage.style.display = 'block';
+    registerMessage.className = 'form-message';
+    registerMessage.innerHTML = `<p>${message}</p>`;
+}
+
+function resetApplicationsView(message = 'Press “Load applications” or apply filters to show your saved job applications.') {
+    applicationsContainer.className = 'message-box';
+    applicationsContainer.innerHTML = `<p>${message}</p>`;
+}
+
+function clearCreateForm() {
+    createApplicationForm.reset();
+    formMessage.style.display = 'none';
+    formMessage.innerHTML = '';
+}
+
+function openCreateDialog() {
+    createDialog.showModal();
+}
+
+function closeCreateDialog() {
+    createDialog.close();
+    formMessage.style.display = 'none';
+}
+
+function openEditDialog(application) {
+    editId.value = application.id;
+    editTitle.value = application.title || '';
+    editCompany.value = application.company || '';
+    editStatus.value = application.status || 'applied';
+    editDateApplied.value = normalizeDateValue(application.date_applied);
+    editLocation.value = application.location || '';
+    editSalary.value = application.salary || '';
+    editJobLink.value = application.job_link || '';
+    editContactName.value = application.contact_name || '';
+    editNotes.value = application.notes || '';
+    editFormMessage.style.display = 'none';
+    editFormMessage.innerHTML = '';
+    editDialog.showModal();
+}
+
+function closeEditDialog() {
+    editDialog.close();
+    editFormMessage.style.display = 'none';
+}
+
+function openLoginDialog() {
+    loginMessage.style.display = 'none';
+    loginForm.reset();
+    loginDialog.showModal();
+}
+
+function closeLoginDialog() {
+    loginDialog.close();
+    loginMessage.style.display = 'none';
+}
+
+function openRegisterDialog() {
+    registerMessage.style.display = 'none';
+    registerForm.reset();
+    registerDialog.showModal();
+}
+
+function closeRegisterDialog() {
+    registerDialog.close();
+    registerMessage.style.display = 'none';
+}
+
+function updateAuthUI(user) {
+    if (user) {
+        authUserBox.style.display = 'block';
+        authUserBox.className = 'form-message';
+        authUserBox.innerHTML = `<p>Logged in as <strong>${escapeHtml(user.username)}</strong></p>`;
+        openLoginDialogButton.style.display = 'none';
+        openRegisterDialogButton.style.display = 'none';
+        logoutButton.style.display = 'inline-block';
+    } else {
+        authUserBox.style.display = 'none';
+        authUserBox.innerHTML = '';
+        openLoginDialogButton.style.display = 'inline-block';
+        openRegisterDialogButton.style.display = 'inline-block';
+        logoutButton.style.display = 'none';
+    }
+}
+
+async function loadCurrentUser() {
+    try {
+        const response = await fetch('/auth/me/', {
+            credentials: 'same-origin'
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to load auth user');
         }
 
-        function escapeHtml(value) {
-            if (value === null || value === undefined) {
-                return '';
-            }
+        const data = await response.json();
 
-            return String(value)
-                .replaceAll('&', '&amp;')
-                .replaceAll('<', '&lt;')
-                .replaceAll('>', '&gt;')
-                .replaceAll('"', '&quot;')
-                .replaceAll("'", '&#39;');
+        if (data.authenticated) {
+            updateAuthUI(data.user);
+            await loadApplications();
+        } else {
+            updateAuthUI(null);
+            resetApplicationsView();
+        }
+    } catch (error) {
+        updateAuthUI(null);
+        resetApplicationsView();
+    }
+}
+
+async function registerUser(event) {
+    event.preventDefault();
+
+    const payload = {
+        username: registerUsername.value,
+        email: registerEmail.value,
+        password: registerPassword.value,
+    };
+
+    try {
+        const response = await fetch('/auth/register/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || 'Registration failed');
         }
 
-        async function loadApplications() {
-            applicationsContainer.className = 'message-box';
-            applicationsContainer.innerHTML = '<p>Loading applications...</p>';
+        showRegisterMessage('Registration successful.');
+        updateAuthUI(data.user);
+        await loadApplications();
 
-            try {
-                const params = new URLSearchParams();
+        setTimeout(() => {
+            closeRegisterDialog();
+        }, 700);
+    } catch (error) {
+        showRegisterMessage(error.message || 'Registration error.');
+    }
+}
 
-                if (statusFilter.value) {
-                    params.append('status', statusFilter.value);
-                }
+async function loginUser(event) {
+    event.preventDefault();
 
-                if (companyFilter.value) {
-                    params.append('company', companyFilter.value);
-                }
+    const payload = {
+        username: loginUsername.value,
+        password: loginPassword.value,
+    };
 
-                if (titleFilter.value) {
-                    params.append('title', titleFilter.value);
-                }
+    try {
+        const response = await fetch('/auth/login/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify(payload)
+        });
 
-                if (dateFromFilter.value) {
-                    params.append('date_applied_from', dateFromFilter.value);
-                }
+        const data = await response.json();
 
-                if (dateToFilter.value) {
-                    params.append('date_applied_to', dateToFilter.value);
-                }
-
-                let url = '/applications/';
-
-                if (params.toString()) {
-                    url += '?' + params.toString();
-                }
-
-                const response = await fetch(url);
-
-                if (!response.ok) {
-                    throw new Error('Failed to load applications');
-                }
-
-                const data = await response.json();
-                const applications = data.applications;
-
-                if (applications.length === 0) {
-                    applicationsContainer.className = 'empty-box';
-                    applicationsContainer.innerHTML = '<p>No applications found for these filters.</p>';
-                    return;
-                }
-
-                let html = '<div class="applications-grid">';
-
-                for (const application of applications) {
-                    const safeTitle = escapeHtml(application.title || 'No title');
-                    const safeCompany = escapeHtml(application.company || 'No company');
-                    const safeStatus = escapeHtml(application.status || 'No status');
-                    const safeLocation = escapeHtml(application.location || 'Not specified');
-                    const safeSalary = escapeHtml(application.salary || 'Not specified');
-                    const safeDateApplied = escapeHtml(application.date_applied || 'Not specified');
-                    const safeContactName = escapeHtml(application.contact_name || 'Not specified');
-                    const safeNotes = escapeHtml(application.notes || 'No notes yet');
-                    const safeJobLink = escapeHtml(application.job_link || '');
-
-                    const statusClassMap = {
-                        applied: 'status-applied',
-                        interview: 'status-interview',
-                        offer: 'status-offer',
-                        rejected: 'status-rejected',
-                        closed: 'status-closed'
-                    };
-
-                    const statusLabelMap = {
-                        applied: 'Applied',
-                        interview: 'Interview',
-                        offer: 'Offer',
-                        rejected: 'Rejected',
-                        closed: 'Closed'
-                    };
-
-                    const statusClass = statusClassMap[application.status] || 'status-applied';
-                    const statusLabel = statusLabelMap[application.status] || safeStatus;
-
-                    html += `
-                        <article class="application-card">
-                            <h3>${safeTitle}</h3>
-                            <p class="company-name">${safeCompany}</p>
-
-                            <div class="status-badge ${statusClass}">
-                                <span class="status-dot"></span>
-                                <span>${statusLabel}</span>
-                            </div>
-
-                            <div class="card-details">
-                                <div class="detail-row">
-                                    <span class="detail-label">Location</span>
-                                    <span class="detail-value">${safeLocation}</span>
-                                </div>
-
-                                <div class="detail-row">
-                                    <span class="detail-label">Salary</span>
-                                    <span class="detail-value">${safeSalary}</span>
-                                </div>
-
-                                <div class="detail-row">
-                                    <span class="detail-label">Date applied</span>
-                                    <span class="detail-value">${safeDateApplied}</span>
-                                </div>
-
-                                <div class="detail-row">
-                                    <span class="detail-label">Contact</span>
-                                    <span class="detail-value">${safeContactName}</span>
-                                </div>
-
-                                <div class="detail-row">
-                                    <span class="detail-label">Notes</span>
-                                    <span class="detail-value">${safeNotes}</span>
-                                </div>
-
-                                <div class="detail-row">
-                                    <span class="detail-label">Job link</span>
-                                    <span class="detail-value">${safeJobLink || 'Not specified'}</span>
-                                </div>
-                            </div>
-
-                            <div class="card-actions">
-                                <button
-                                    type="button"
-                                    class="card-action-button"
-                                    onclick='openEditDialog(${JSON.stringify(application)})'
-                                >
-                                    Edit
-                                </button>
-
-                                <button
-                                    type="button"
-                                    class="delete-button"
-                                    onclick="deleteApplication(${application.id})"
-                                >
-                                    Delete
-                                </button>
-                            </div>
-                        </article>
-                    `;
-                }
-
-                html += '</div>';
-                applicationsContainer.className = '';
-                applicationsContainer.innerHTML = html;
-            } catch (error) {
-                applicationsContainer.className = 'message-box';
-                applicationsContainer.innerHTML = '<p>Error loading applications.</p>';
-            }
+        if (!response.ok) {
+            throw new Error(data.error || 'Login failed');
         }
 
-        function resetFilters() {
-            statusFilter.value = '';
-            companyFilter.value = '';
-            titleFilter.value = '';
-            dateFromFilter.value = '';
-            dateToFilter.value = '';
-            loadApplications();
+        showLoginMessage('Login successful.');
+        updateAuthUI(data.user);
+        await loadApplications();
+
+        setTimeout(() => {
+            closeLoginDialog();
+        }, 700);
+    } catch (error) {
+        showLoginMessage(error.message || 'Login error.');
+    }
+}
+
+async function logoutUser() {
+    try {
+        const response = await fetch('/auth/logout/', {
+            method: 'POST',
+            credentials: 'same-origin'
+        });
+
+        if (!response.ok) {
+            throw new Error('Logout failed');
         }
 
-        function clearCreateForm() {
-            createApplicationForm.reset();
-            formMessage.style.display = 'none';
-            formMessage.innerHTML = '';
+        updateAuthUI(null);
+        resetApplicationsView('You have logged out. Login again to load your applications.');
+    } catch (error) {
+        authUserBox.style.display = 'block';
+        authUserBox.className = 'form-message';
+        authUserBox.innerHTML = '<p>Logout error.</p>';
+    }
+}
+
+async function loadApplications() {
+    applicationsContainer.className = 'message-box';
+    applicationsContainer.innerHTML = '<p>Loading applications...</p>';
+
+    try {
+        const params = new URLSearchParams();
+
+        if (statusFilter.value) params.append('status', statusFilter.value);
+        if (companyFilter.value) params.append('company', companyFilter.value);
+        if (titleFilter.value) params.append('title', titleFilter.value);
+        if (dateFromFilter.value) params.append('date_applied_from', dateFromFilter.value);
+        if (dateToFilter.value) params.append('date_applied_to', dateToFilter.value);
+
+        let url = '/applications/';
+        if (params.toString()) {
+            url += `?${params.toString()}`;
         }
 
-        function showCreateFormMessage(message) {
-            formMessage.style.display = 'block';
-            formMessage.className = 'form-message';
-            formMessage.innerHTML = `<p>${message}</p>`;
+        const response = await fetch(url, {
+            credentials: 'same-origin'
+        });
+
+        const data = await response.json();
+
+        if (response.status === 401) {
+            resetApplicationsView('Login to view your applications.');
+            return;
         }
 
-        function showEditFormMessage(message) {
-            editFormMessage.style.display = 'block';
-            editFormMessage.className = 'form-message';
-            editFormMessage.innerHTML = `<p>${message}</p>`;
+        if (!response.ok) {
+            throw new Error(data.error || 'Failed to load applications');
         }
 
-        async function createApplication(event) {
-            event.preventDefault();
+        const applications = data.applications || [];
 
-            const payload = {
-                title: createTitle.value,
-                company: createCompany.value,
-                status: createStatus.value,
-                date_applied: createDateApplied.value,
-                location: createLocation.value,
-                salary: createSalary.value,
-                job_link: createJobLink.value,
-                contact_name: createContactName.value,
-                notes: createNotes.value
+        if (applications.length === 0) {
+            applicationsContainer.className = 'empty-box';
+            applicationsContainer.innerHTML = '<p>No applications found for these filters.</p>';
+            return;
+        }
+
+        let html = '<div class="applications-grid">';
+
+        for (const application of applications) {
+            const safeTitle = escapeHtml(application.title || 'No title');
+            const safeCompany = escapeHtml(application.company || 'No company');
+            const safeStatus = escapeHtml(application.status || 'No status');
+            const safeLocation = escapeHtml(application.location || 'Not specified');
+            const safeSalary = escapeHtml(application.salary || 'Not specified');
+            const safeDateApplied = escapeHtml(application.date_applied || 'Not specified');
+            const safeContactName = escapeHtml(application.contact_name || 'Not specified');
+            const safeNotes = escapeHtml(application.notes || 'No notes yet');
+            const safeJobLink = application.job_link
+                ? `<a href="${escapeHtml(application.job_link)}" target="_blank" rel="noopener noreferrer">${escapeHtml(application.job_link)}</a>`
+                : 'Not specified';
+
+            const statusClassMap = {
+                applied: 'status-applied',
+                interview: 'status-interview',
+                offer: 'status-offer',
+                rejected: 'status-rejected',
+                closed: 'status-closed'
             };
 
-            try {
-                const response = await fetch('/applications/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(payload)
-                });
+            const statusLabelMap = {
+                applied: 'Applied',
+                interview: 'Interview',
+                offer: 'Offer',
+                rejected: 'Rejected',
+                closed: 'Closed'
+            };
 
-                if (!response.ok) {
-                    throw new Error('Failed to create application');
-                }
+            const statusClass = statusClassMap[application.status] || 'status-applied';
+            const statusLabel = statusLabelMap[application.status] || safeStatus;
 
-                clearCreateForm();
-                showCreateFormMessage('Application created successfully.');
-                loadApplications();
+            html += `
+                <article class="application-card">
+                    <h3>${safeTitle}</h3>
+                    <p class="company-name">${safeCompany}</p>
 
-                setTimeout(() => {
-                    createDialog.close();
-                    formMessage.style.display = 'none';
-                }, 700);
-            } catch (error) {
-                showCreateFormMessage('Error creating application.');
-            }
+                    <div class="status-badge ${statusClass}">
+                        <span class="status-dot"></span>
+                        <span>${statusLabel}</span>
+                    </div>
+
+                    <div class="card-details">
+                        <div class="detail-row">
+                            <span class="detail-label">Location</span>
+                            <span class="detail-value">${safeLocation}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Salary</span>
+                            <span class="detail-value">${safeSalary}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Date applied</span>
+                            <span class="detail-value">${safeDateApplied}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Contact</span>
+                            <span class="detail-value">${safeContactName}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Notes</span>
+                            <span class="detail-value">${safeNotes}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Job link</span>
+                            <span class="detail-value">${safeJobLink}</span>
+                        </div>
+                    </div>
+
+                    <div class="card-actions">
+                        <button type="button" class="card-action-button" onclick='openEditDialog(${JSON.stringify(application)})'>
+                            Edit
+                        </button>
+                        <button type="button" class="delete-button" onclick="deleteApplication(${application.id})">
+                            Delete
+                        </button>
+                    </div>
+                </article>
+            `;
         }
 
-        function openCreateDialog() {
-            createDialog.showModal();
+        html += '</div>';
+        applicationsContainer.className = '';
+        applicationsContainer.innerHTML = html;
+    } catch (error) {
+        applicationsContainer.className = 'message-box';
+        applicationsContainer.innerHTML = '<p>Error loading applications.</p>';
+    }
+}
+
+function resetFilters() {
+    statusFilter.value = '';
+    companyFilter.value = '';
+    titleFilter.value = '';
+    dateFromFilter.value = '';
+    dateToFilter.value = '';
+    loadApplications();
+}
+
+async function createApplication(event) {
+    event.preventDefault();
+
+    const payload = {
+        title: createTitle.value,
+        company: createCompany.value,
+        status: createStatus.value,
+        date_applied: createDateApplied.value,
+        location: createLocation.value,
+        salary: createSalary.value,
+        job_link: createJobLink.value,
+        contact_name: createContactName.value,
+        notes: createNotes.value,
+    };
+
+    try {
+        const response = await fetch('/applications/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json().catch(() => null);
+
+        if (!response.ok) {
+            throw new Error((data && data.error) || 'Failed to create application');
         }
 
-        function closeCreateDialog() {
+        clearCreateForm();
+        showCreateFormMessage('Application created successfully.');
+        await loadApplications();
+
+        setTimeout(() => {
             createDialog.close();
             formMessage.style.display = 'none';
+        }, 700);
+    } catch (error) {
+        showCreateFormMessage(error.message || 'Error creating application.');
+    }
+}
+
+async function updateApplication(event) {
+    event.preventDefault();
+
+    const applicationId = editId.value;
+
+    const payload = {
+        title: editTitle.value,
+        company: editCompany.value,
+        status: editStatus.value,
+        date_applied: editDateApplied.value,
+        location: editLocation.value,
+        salary: editSalary.value,
+        job_link: editJobLink.value,
+        contact_name: editContactName.value,
+        notes: editNotes.value,
+    };
+
+    try {
+        const response = await fetch(`/applications/${applicationId}/`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json().catch(() => null);
+
+        if (!response.ok) {
+            throw new Error((data && data.error) || 'Failed to update application');
         }
 
-        function openEditDialog(application) {
-            editId.value = application.id;
-            editTitle.value = application.title || '';
-            editCompany.value = application.company || '';
-            editStatus.value = application.status || 'applied';
-            editDateApplied.value = normalizeDateValue(application.date_applied);
-            editLocation.value = application.location || '';
-            editSalary.value = application.salary || '';
-            editJobLink.value = application.job_link || '';
-            editContactName.value = application.contact_name || '';
-            editNotes.value = application.notes || '';
+        showEditFormMessage('Application updated successfully.');
+        await loadApplications();
 
-            editFormMessage.style.display = 'none';
-            editFormMessage.innerHTML = '';
+        setTimeout(() => {
+            closeEditDialog();
+        }, 700);
+    } catch (error) {
+        showEditFormMessage(error.message || 'Error updating application.');
+    }
+}
 
-            editDialog.showModal();
+async function deleteApplication(applicationId) {
+    const confirmed = window.confirm('Delete this application?');
+    if (!confirmed) return;
+
+    try {
+        const response = await fetch(`/applications/${applicationId}/`, {
+            method: 'DELETE',
+            credentials: 'same-origin'
+        });
+
+        if (!response.ok && response.status !== 204) {
+            throw new Error('Failed to delete application');
         }
 
-        function closeEditDialog() {
-            editDialog.close();
-            editFormMessage.style.display = 'none';
-        }
+        await loadApplications();
+    } catch (error) {
+        applicationsContainer.className = 'message-box';
+        applicationsContainer.innerHTML = '<p>Error deleting application.</p>';
+    }
+}
 
-        async function updateApplication(event) {
-            event.preventDefault();
+window.openEditDialog = openEditDialog;
+window.deleteApplication = deleteApplication;
 
-            const applicationId = editId.value;
+loadApplicationsButton.addEventListener('click', loadApplications);
+applyFiltersButton.addEventListener('click', loadApplications);
+resetFiltersButton.addEventListener('click', resetFilters);
 
-            const payload = {
-                title: editTitle.value,
-                company: editCompany.value,
-                status: editStatus.value,
-                date_applied: editDateApplied.value,
-                location: editLocation.value,
-                salary: editSalary.value,
-                job_link: editJobLink.value,
-                contact_name: editContactName.value,
-                notes: editNotes.value
-            };
+openCreateDialogButton.addEventListener('click', openCreateDialog);
+closeCreateDialogButton.addEventListener('click', closeCreateDialog);
+closeEditDialogButton.addEventListener('click', closeEditDialog);
 
-            try {
-                const response = await fetch(`/applications/${applicationId}/`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(payload)
-                });
+openLoginDialogButton.addEventListener('click', openLoginDialog);
+openRegisterDialogButton.addEventListener('click', openRegisterDialog);
+closeLoginDialogButton.addEventListener('click', closeLoginDialog);
+closeRegisterDialogButton.addEventListener('click', closeRegisterDialog);
 
-                if (!response.ok) {
-                    throw new Error('Failed to update application');
-                }
+createApplicationForm.addEventListener('submit', createApplication);
+clearFormButton.addEventListener('click', clearCreateForm);
+editApplicationForm.addEventListener('submit', updateApplication);
+loginForm.addEventListener('submit', loginUser);
+registerForm.addEventListener('submit', registerUser);
+logoutButton.addEventListener('click', logoutUser);
 
-                showEditFormMessage('Application updated successfully.');
-                loadApplications();
-
-                setTimeout(() => {
-                    closeEditDialog();
-                }, 700);
-            } catch (error) {
-                showEditFormMessage('Error updating application.');
-            }
-        }
-
-        async function deleteApplication(applicationId) {
-            const confirmed = window.confirm('Delete this application?');
-
-            if (!confirmed) {
-                return;
-            }
-
-            try {
-                const response = await fetch(`/applications/${applicationId}/`, {
-                    method: 'DELETE'
-                });
-
-                if (!response.ok && response.status !== 204) {
-                    throw new Error('Failed to delete application');
-                }
-
-                loadApplications();
-            } catch (error) {
-                applicationsContainer.className = 'message-box';
-                applicationsContainer.innerHTML = '<p>Error deleting application.</p>';
-            }
-        }
-
-        window.openEditDialog = openEditDialog;
-        window.deleteApplication = deleteApplication;
-
-        loadApplicationsButton.addEventListener('click', loadApplications);
-        applyFiltersButton.addEventListener('click', loadApplications);
-        resetFiltersButton.addEventListener('click', resetFilters);
-
-        openCreateDialogButton.addEventListener('click', openCreateDialog);
-        closeCreateDialogButton.addEventListener('click', closeCreateDialog);
-        closeEditDialogButton.addEventListener('click', closeEditDialog);
-
-        createApplicationForm.addEventListener('submit', createApplication);
-        clearFormButton.addEventListener('click', clearCreateForm);
-        editApplicationForm.addEventListener('submit', updateApplication);
-    </script>
+loadCurrentUser();
+</script>
 </body>
 </html>
