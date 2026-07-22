@@ -1,6 +1,7 @@
 from django.contrib import admin
 from .models import UserProfile, JobApplication
 
+
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'email')
@@ -14,10 +15,12 @@ class JobApplicationAdmin(admin.ModelAdmin):
         'title',
         'company',
         'status',
+        'label_color',
+        'is_favorite',
         'salary',
         'location',
         'date_applied',
         'contact_name',
     )
-    list_filter = ('status', 'company', 'date_applied', 'location')
+    list_filter = ('status', 'label_color', 'is_favorite', 'company', 'date_applied', 'location')
     search_fields = ('title', 'company', 'contact_name', 'notes', 'location', 'salary')

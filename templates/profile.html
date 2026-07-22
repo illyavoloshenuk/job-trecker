@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile | Job Tracker</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(180deg, #f4f4f5 0%, #e9e9ec 100%);
+            color: #111111;
+        }
+
+        .page {
+            max-width: 1120px;
+            margin: 0 auto;
+            padding: 32px 20px 80px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .brand-mark {
+            width: 56px;
+            height: 56px;
+            border-radius: 18px;
+            background: linear-gradient(180deg, #ffffff 0%, #f1f1f1 100%);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 10px 25px rgba(0, 0, 0, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .brand-dot {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #111111;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .brand-text h1 {
+            margin: 0;
+            font-size: 28px;
+            line-height: 1.1;
+        }
+
+        .brand-text p {
+            margin: 6px 0 0;
+            color: #666666;
+            font-size: 14px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .nav-link,
+        .main-button,
+        .secondary-button,
+        .submit-button {
+            border: none;
+            padding: 13px 20px;
+            border-radius: 999px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-link,
+        .secondary-button {
+            border: 1px solid #d7d7db;
+            background: rgba(255, 255, 255, 0.82);
+            color: #111111;
+        }
+
+        .nav-link.active,
+        .main-button,
+        .submit-button {
+            background: #111111;
+            color: white;
+            box-shadow: 0 12px 22px rgba(0, 0, 0, 0.18);
+        }
+
+        .nav-link:hover,
+        .secondary-button:hover {
+            background: white;
+        }
+
+        .main-button:hover,
+        .submit-button:hover {
+            background: #000000;
+        }
+
+        .hero-card,
+        .profile-card,
+        .stats-card,
+        .edit-card,
+        .message-box {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 32px;
+            padding: 28px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08), 0 8px 20px rgba(0, 0, 0, 0.05);
+            backdrop-filter: blur(12px);
+        }
+
+        .hero-card {
+            margin-bottom: 24px;
+        }
+
+        .hero-card h2 {
+            margin: 0 0 10px;
+            font-size: 34px;
+            line-height: 1.1;
+        }
+
+        .hero-card p {
+            margin: 0;
+            font-size: 16px;
+            color: #555555;
+            max-width: 760px;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 24px;
+            align-items: start;
+        }
+
+        .left-column,
+        .right-column {
+            display: grid;
+            gap: 24px;
+        }
+
+        .profile-head {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .avatar {
+            width: 78px;
+            height: 78px;
+            border-radius: 24px;
+            background: #111111;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            font-weight: 700;
+            flex-shrink: 0;
+            box-shadow: 0 16px 30px rgba(0, 0, 0, 0.18);
+        }
+
+        .profile-meta h3 {
+            margin: 0 0 6px;
+            font-size: 28px;
+            line-height: 1.1;
+        }
+
+        .profile-meta p {
+            margin: 0;
+            color: #666666;
+            font-size: 15px;
+        }
+
+        .section-title {
+            margin: 0 0 18px;
+            font-size: 24px;
+        }
+
+        .info-grid,
+        .stats-grid {
+            display: grid;
+            gap: 14px;
+        }
+
+        .info-row,
+        .stat-box {
+            background: #f5f5f7;
+            border-radius: 18px;
+            padding: 16px 18px;
+            border: 1px solid #ececef;
+        }
+
+        .info-label,
+        .stat-label,
+        .form-label {
+            display: block;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #7a7a7a;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .info-value {
+            font-size: 16px;
+            color: #111111;
+            word-break: break-word;
+        }
+
+        .stats-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .stat-number {
+            font-size: 28px;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .edit-card form {
+            display: grid;
+            gap: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            border: 1px solid #dddddf;
+            background: #f7f7f8;
+            border-radius: 18px;
+            padding: 14px 16px;
+            font-size: 14px;
+            color: #111111;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus {
+            border-color: #111111;
+            background: white;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 6px;
+        }
+
+        .message-box {
+            margin-top: 18px;
+            padding: 16px 18px;
+            border-radius: 20px;
+            color: #444444;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .loading-text {
+            color: #666666;
+            font-size: 15px;
+        }
+
+        @media (max-width: 860px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .page {
+                padding: 24px 16px 56px;
+            }
+
+            .hero-card,
+            .profile-card,
+            .stats-card,
+            .edit-card,
+            .message-box {
+                padding: 22px;
+                border-radius: 24px;
+            }
+
+            .hero-card h2 {
+                font-size: 28px;
+            }
+
+            .brand-text h1 {
+                font-size: 24px;
+            }
+
+            .profile-meta h3 {
+                font-size: 24px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .avatar {
+                width: 68px;
+                height: 68px;
+                font-size: 26px;
+                border-radius: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <header class="topbar">
+            <div class="brand">
+                <div class="brand-mark">
+                    <div class="brand-dot">J</div>
+                </div>
+
+                <div class="brand-text">
+                    <h1>Job Tracker</h1>
+                    <p>Your profile and application progress.</p>
+                </div>
+            </div>
+
+            <nav class="nav-links">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/dashboard/" class="nav-link">Dashboard</a>
+                <a href="/applications-page/" class="nav-link">Applications</a>
+                <a href="/filters/" class="nav-link">Filters</a>
+                <a href="/profile/" class="nav-link active">Profile</a>
+            </nav>
+        </header>
+
+        <section class="hero-card">
+            <h2>Profile</h2>
+            <p>
+                Here you can see your account details and how your job search is going right now.
+            </p>
+        </section>
+
+        <div class="content-grid">
+            <div class="left-column">
+                <section class="profile-card">
+                    <div class="profile-head">
+                        <div class="avatar" id="profile-avatar">U</div>
+
+                        <div class="profile-meta">
+                            <h3 id="profile-username">Loading...</h3>
+                            <p id="profile-email">Please wait while profile data loads.</p>
+                        </div>
+                    </div>
+
+                    <h2 class="section-title">Account information</h2>
+
+                    <div class="info-grid">
+                        <div class="info-row">
+                            <span class="info-label">Username</span>
+                            <span class="info-value" id="info-username">Loading...</span>
+                        </div>
+
+                        <div class="info-row">
+                            <span class="info-label">Email</span>
+                            <span class="info-value" id="info-email">Loading...</span>
+                        </div>
+
+                        <div class="info-row">
+                            <span class="info-label">Account status</span>
+                            <span class="info-value">Authenticated user</span>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="edit-card">
+                    <h2 class="section-title">Edit profile</h2>
+
+                    <form id="profile-form">
+                        <div class="form-group">
+                            <label class="form-label" for="edit-username">Username</label>
+                            <input id="edit-username" class="form-input" type="text" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="edit-email">Email</label>
+                            <input id="edit-email" class="form-input" type="email">
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="submit-button">Save changes</button>
+                            <button type="button" id="reload-profile-button" class="secondary-button">Reload</button>
+                        </div>
+                    </form>
+
+                    <div id="profile-message" class="message-box hidden"></div>
+                </section>
+            </div>
+
+            <div class="right-column">
+                <section class="stats-card">
+                    <h2 class="section-title">Application stats</h2>
+
+                    <div id="stats-loading" class="loading-text">Loading your stats...</div>
+
+                    <div id="stats-grid" class="stats-grid hidden">
+                        <div class="stat-box">
+                            <span class="stat-label">Total</span>
+                            <div class="stat-number" id="stat-total">0</div>
+                        </div>
+
+                        <div class="stat-box">
+                            <span class="stat-label">Applied</span>
+                            <div class="stat-number" id="stat-applied">0</div>
+                        </div>
+
+                        <div class="stat-box">
+                            <span class="stat-label">Interview</span>
+                            <div class="stat-number" id="stat-interview">0</div>
+                        </div>
+
+                        <div class="stat-box">
+                            <span class="stat-label">Offer</span>
+                            <div class="stat-number" id="stat-offer">0</div>
+                        </div>
+
+                        <div class="stat-box">
+                            <span class="stat-label">Rejected</span>
+                            <div class="stat-number" id="stat-rejected">0</div>
+                        </div>
+
+                        <div class="stat-box">
+                            <span class="stat-label">Closed</span>
+                            <div class="stat-number" id="stat-closed">0</div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const profileAvatar = document.getElementById('profile-avatar');
+        const profileUsername = document.getElementById('profile-username');
+        const profileEmail = document.getElementById('profile-email');
+        const infoUsername = document.getElementById('info-username');
+        const infoEmail = document.getElementById('info-email');
+
+        const editUsername = document.getElementById('edit-username');
+        const editEmail = document.getElementById('edit-email');
+        const profileForm = document.getElementById('profile-form');
+        const profileMessage = document.getElementById('profile-message');
+        const reloadProfileButton = document.getElementById('reload-profile-button');
+
+        const statsLoading = document.getElementById('stats-loading');
+        const statsGrid = document.getElementById('stats-grid');
+
+        const statTotal = document.getElementById('stat-total');
+        const statApplied = document.getElementById('stat-applied');
+        const statInterview = document.getElementById('stat-interview');
+        const statOffer = document.getElementById('stat-offer');
+        const statRejected = document.getElementById('stat-rejected');
+        const statClosed = document.getElementById('stat-closed');
+
+        function escapeHtml(value) {
+            if (value === null || value === undefined) {
+                return '';
+            }
+
+            return String(value)
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#39;');
+        }
+
+        function showMessage(message) {
+            profileMessage.classList.remove('hidden');
+            profileMessage.innerHTML = `<p>${escapeHtml(message)}</p>`;
+        }
+
+        function hideMessage() {
+            profileMessage.classList.add('hidden');
+            profileMessage.innerHTML = '';
+        }
+
+        function setProfileData(data) {
+            const user = data.user || {};
+            const stats = data.stats || {};
+
+            const username = user.username || 'Unknown user';
+            const email = user.email || 'No email';
+
+            profileAvatar.textContent = username.charAt(0).toUpperCase() || 'U';
+            profileUsername.textContent = username;
+            profileEmail.textContent = email;
+
+            infoUsername.textContent = username;
+            infoEmail.textContent = email;
+
+            editUsername.value = username;
+            editEmail.value = user.email || '';
+
+            statTotal.textContent = stats.total ?? 0;
+            statApplied.textContent = stats.applied ?? 0;
+            statInterview.textContent = stats.interview ?? 0;
+            statOffer.textContent = stats.offer ?? 0;
+            statRejected.textContent = stats.rejected ?? 0;
+            statClosed.textContent = stats.closed ?? 0;
+
+            statsLoading.classList.add('hidden');
+            statsGrid.classList.remove('hidden');
+        }
+
+        async function loadProfile() {
+            hideMessage();
+            statsLoading.classList.remove('hidden');
+            statsGrid.classList.add('hidden');
+
+            try {
+                const response = await fetch('/profile-data/', {
+                    credentials: 'same-origin'
+                });
+
+                const data = await response.json().catch(() => null);
+
+                if (response.status === 401) {
+                    showMessage('You need to login first.');
+                    profileUsername.textContent = 'Not logged in';
+                    profileEmail.textContent = 'Open login and sign in first.';
+                    infoUsername.textContent = 'Not available';
+                    infoEmail.textContent = 'Not available';
+                    statsLoading.textContent = 'Login required to view stats.';
+                    return;
+                }
+
+                if (!response.ok) {
+                    throw new Error((data && data.error) || 'Failed to load profile');
+                }
+
+                setProfileData(data);
+            } catch (error) {
+                showMessage(error.message || 'Profile loading error.');
+                statsLoading.textContent = 'Could not load stats.';
+            }
+        }
+
+        async function updateProfile(event) {
+            event.preventDefault();
+            hideMessage();
+
+            const payload = {
+                username: editUsername.value,
+                email: editEmail.value
+            };
+
+            try {
+                const response = await fetch('/profile-data/', {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'same-origin',
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json().catch(() => null);
+
+                if (!response.ok) {
+                    throw new Error((data && data.error) || 'Failed to update profile');
+                }
+
+                setProfileData(data);
+                showMessage(data.message || 'Profile updated successfully.');
+            } catch (error) {
+                showMessage(error.message || 'Profile update error.');
+            }
+        }
+
+        profileForm.addEventListener('submit', updateProfile);
+        reloadProfileButton.addEventListener('click', loadProfile);
+
+        loadProfile();
+    </script>
+</body>
+</html>
