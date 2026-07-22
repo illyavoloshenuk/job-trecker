@@ -106,6 +106,9 @@
       font-weight: 700;
       cursor: pointer;
       transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .nav-button.active {
@@ -190,9 +193,13 @@
       border: 1px solid #d7d7db;
     }
 
-    .delete-button:hover { background: #dddddf; }
+    .delete-button:hover {
+      background: #dddddf;
+    }
 
-    .section-block { margin-bottom: 24px; }
+    .section-block {
+      margin-bottom: 24px;
+    }
 
     .hero.compact-hero {
       background: rgba(255, 255, 255, 0.88);
@@ -254,7 +261,9 @@
       max-width: 760px;
     }
 
-    .filters-panel { padding: 32px; }
+    .filters-panel {
+      padding: 32px;
+    }
 
     .filters-header {
       display: flex;
@@ -666,17 +675,17 @@
         </div>
 
         <div class="top-nav">
-          <button id="tab-applications" class="nav-button active" type="button">Applications</button>
-          <button id="tab-filters" class="nav-button" type="button">Filters</button>
-          <button id="tab-favorites" class="nav-button" type="button">Favorites</button>
-          <button id="tab-profile" class="nav-button" type="button">Profile</button>
+          <button class="nav-button active" id="nav-applications" type="button">Applications</button>
+          <button class="nav-button" id="nav-filters" type="button">Filters</button>
+          <button class="nav-button" id="nav-favorites" type="button">Favorites</button>
+          <a href="/profile/" class="nav-button">Profile</a>
         </div>
 
         <div class="auth-block">
           <button id="open-login-dialog-button" class="secondary-button" type="button">Login</button>
           <button id="open-register-dialog-button" class="secondary-button" type="button">Register</button>
-          <div id="auth-user-box" class="user-pill" style="display: none;"></div>
-          <button id="logout-button" class="secondary-button" type="button" style="display: none;">Logout</button>
+          <div id="auth-user-box" class="user-pill hidden"></div>
+          <button id="logout-button" class="secondary-button hidden" type="button">Logout</button>
         </div>
       </div>
     </section>
@@ -725,10 +734,20 @@
           </div>
 
           <div class="filter-group">
-            <label class="filter-label" for="label-color-filter">Label color</label>
-            <select id="label-color-filter" class="filter-select">
+            <label class="filter-label" for="company-filter">Company</label>
+            <input id="company-filter" class="filter-input" type="text" placeholder="Company name" />
+          </div>
+
+          <div class="filter-group">
+            <label class="filter-label" for="title-filter">Title</label>
+            <input id="title-filter" class="filter-input" type="text" placeholder="Job title" />
+          </div>
+
+          <div class="filter-group">
+            <label class="filter-label" for="label-filter">Label color</label>
+            <select id="label-filter" class="filter-select">
               <option value="">All colors</option>
-              <option value="none">No color</option>
+              <option value="none">None</option>
               <option value="blue">Blue</option>
               <option value="green">Green</option>
               <option value="yellow">Yellow</option>
@@ -736,16 +755,6 @@
               <option value="purple">Purple</option>
               <option value="gray">Gray</option>
             </select>
-          </div>
-
-          <div class="filter-group">
-            <label class="filter-label" for="company-filter">Company</label>
-            <input id="company-filter" class="filter-input" type="text" placeholder="Spotify" />
-          </div>
-
-          <div class="filter-group">
-            <label class="filter-label" for="title-filter">Title</label>
-            <input id="title-filter" class="filter-input" type="text" placeholder="Backend Developer" />
           </div>
 
           <div class="filter-group">
@@ -761,12 +770,10 @@
 
         <div class="filter-actions">
           <button id="apply-filters-button" class="filter-button" type="button">Apply filters</button>
-          <button id="reset-filters-button" class="secondary-button" type="button">Reset filters</button>
+          <button id="reset-filters-button" class="secondary-button" type="button">Reset</button>
         </div>
 
-        <div id="filter-results-container" class="results-box message-box">
-          Apply filters to see matching applications here.
-        </div>
+        <div id="filters-results" class="results-box"></div>
       </section>
     </section>
 
@@ -774,355 +781,150 @@
       <section>
         <h2 class="section-title">Favorites</h2>
         <div id="favorites-container" class="message-box">
-          You have no favorite applications yet.
+          Loading favorites...
         </div>
       </section>
     </section>
-
-    <section id="profile-tab" class="section-block hidden">
-      <section>
-        <h2 class="section-title">Profile</h2>
-        <div class="message-box">
-          <a href="/profile/">Open full profile page</a>
-        </div>
-      </section>
-    </section>
-
-    <div>
-      <button id="open-create-dialog-button" class="floating-create-button" aria-label="Create application" type="button">+</button>
-    </div>
-
-    <dialog id="create-dialog" class="modal-dialog">
-      <div class="dialog-card">
-        <div class="dialog-top">
-          <div class="dialog-top-left">
-            <h2 class="modal-title">Create application</h2>
-            <p class="panel-subtitle">Add a new job application in the same minimal style.</p>
-          </div>
-          <button id="close-create-dialog-button" class="modal-close-button" type="button">Close</button>
-        </div>
-
-        <form id="create-application-form">
-          <div class="form-grid">
-            <div class="form-group">
-              <label class="form-label" for="create-title">Title</label>
-              <input id="create-title" class="form-input" type="text" placeholder="Backend Developer" required />
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" for="create-company">Company</label>
-              <input id="create-company" class="form-input" type="text" placeholder="Spotify" required />
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" for="create-status">Status</label>
-              <select id="create-status" class="form-select" required>
-                <option value="applied">Applied</option>
-                <option value="interview">Interview</option>
-                <option value="offer">Offer</option>
-                <option value="rejected">Rejected</option>
-                <option value="closed">Closed</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" for="create-label-color">Label color</label>
-              <select id="create-label-color" class="form-select">
-                <option value="none">No color</option>
-                <option value="blue">Blue</option>
-                <option value="green">Green</option>
-                <option value="yellow">Yellow</option>
-                <option value="pink">Pink</option>
-                <option value="purple">Purple</option>
-                <option value="gray">Gray</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" for="create-date-applied">Date applied</label>
-              <input id="create-date-applied" class="form-input" type="date" />
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" for="create-location">Location</label>
-              <input id="create-location" class="form-input" type="text" placeholder="Berlin" />
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" for="create-salary">Salary</label>
-              <input id="create-salary" class="form-input" type="text" placeholder="4000 EUR" />
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" for="create-job-link">Job link</label>
-              <input id="create-job-link" class="form-input" type="url" placeholder="https://example.com/job" />
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" for="create-contact-name">Contact name</label>
-              <input id="create-contact-name" class="form-input" type="text" placeholder="John Recruiter" />
-            </div>
-          </div>
-
-          <div class="form-group" style="margin-top: 14px;">
-            <label class="form-label" for="create-notes">Notes</label>
-            <textarea id="create-notes" class="form-textarea" placeholder="Applied through LinkedIn, waiting for reply..."></textarea>
-          </div>
-
-          <div class="form-actions">
-            <button type="submit" class="submit-button">Create application</button>
-            <button type="button" id="clear-form-button" class="secondary-button">Clear form</button>
-          </div>
-        </form>
-
-        <div id="form-message" style="display: none;"></div>
-      </div>
-    </dialog>
-
-    <dialog id="edit-dialog" class="modal-dialog">
-      <div class="dialog-card">
-        <div class="dialog-top">
-          <div class="dialog-top-left">
-            <h2 class="modal-title">Edit application</h2>
-            <p class="panel-subtitle">Update an existing job application.</p>
-          </div>
-          <button id="close-edit-dialog-button" class="modal-close-button" type="button">Close</button>
-        </div>
-
-        <form id="edit-application-form">
-          <input id="edit-id" type="hidden" />
-
-          <div class="form-grid">
-            <div class="form-group">
-              <label class="form-label" for="edit-title">Title</label>
-              <input id="edit-title" class="form-input" type="text" required />
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" for="edit-company">Company</label>
-              <input id="edit-company" class="form-input" type="text" required />
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" for="edit-status">Status</label>
-              <select id="edit-status" class="form-select" required>
-                <option value="applied">Applied</option>
-                <option value="interview">Interview</option>
-                <option value="offer">Offer</option>
-                <option value="rejected">Rejected</option>
-                <option value="closed">Closed</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" for="edit-label-color">Label color</label>
-              <select id="edit-label-color" class="form-select">
-                <option value="none">No color</option>
-                <option value="blue">Blue</option>
-                <option value="green">Green</option>
-                <option value="yellow">Yellow</option>
-                <option value="pink">Pink</option>
-                <option value="purple">Purple</option>
-                <option value="gray">Gray</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" for="edit-date-applied">Date applied</label>
-              <input id="edit-date-applied" class="form-input" type="date" />
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" for="edit-location">Location</label>
-              <input id="edit-location" class="form-input" type="text" />
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" for="edit-salary">Salary</label>
-              <input id="edit-salary" class="form-input" type="text" />
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" for="edit-job-link">Job link</label>
-              <input id="edit-job-link" class="form-input" type="url" />
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" for="edit-contact-name">Contact name</label>
-              <input id="edit-contact-name" class="form-input" type="text" />
-            </div>
-          </div>
-
-          <div class="form-group" style="margin-top: 14px;">
-            <label class="form-label" for="edit-notes">Notes</label>
-            <textarea id="edit-notes" class="form-textarea"></textarea>
-          </div>
-
-          <div class="form-actions">
-            <button type="submit" class="submit-button">Save changes</button>
-          </div>
-        </form>
-
-        <div id="edit-form-message" style="display: none;"></div>
-      </div>
-    </dialog>
-
-    <dialog id="login-dialog" class="modal-dialog">
-      <div class="dialog-card">
-        <div class="dialog-top">
-          <div class="dialog-top-left">
-            <h2 class="modal-title">Login</h2>
-            <p class="panel-subtitle">Sign in to your account.</p>
-          </div>
-          <button id="close-login-dialog-button" class="modal-close-button" type="button">Close</button>
-        </div>
-
-        <form id="login-form">
-          <div class="form-grid">
-            <div class="form-group">
-              <label class="form-label" for="login-username">Username</label>
-              <input id="login-username" class="form-input" type="text" required />
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" for="login-password">Password</label>
-              <input id="login-password" class="form-input" type="password" required />
-            </div>
-          </div>
-
-          <div class="form-actions">
-            <button type="submit" class="submit-button">Login</button>
-          </div>
-        </form>
-
-        <div id="login-message" style="display: none;"></div>
-      </div>
-    </dialog>
-
-    <dialog id="register-dialog" class="modal-dialog">
-      <div class="dialog-card">
-        <div class="dialog-top">
-          <div class="dialog-top-left">
-            <h2 class="modal-title">Register</h2>
-            <p class="panel-subtitle">Create a new account.</p>
-          </div>
-          <button id="close-register-dialog-button" class="modal-close-button" type="button">Close</button>
-        </div>
-
-        <form id="register-form">
-          <div class="form-grid">
-            <div class="form-group">
-              <label class="form-label" for="register-username">Username</label>
-              <input id="register-username" class="form-input" type="text" required />
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" for="register-email">Email</label>
-              <input id="register-email" class="form-input" type="email" />
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" for="register-password">Password</label>
-              <input id="register-password" class="form-input" type="password" required />
-            </div>
-          </div>
-
-          <div class="form-actions">
-            <button type="submit" class="submit-button">Register</button>
-          </div>
-        </form>
-
-        <div id="register-message" style="display: none;"></div>
-      </div>
-    </dialog>
   </div>
 
+  <button id="open-create-dialog-button" class="floating-create-button" type="button" aria-label="Create application">+</button>
+
+  <!-- Диалог создания заявки -->
+  <dialog id="create-dialog" class="modal-dialog">
+    <div class="dialog-card">
+      <div class="dialog-top">
+        <div class="dialog-top-left">
+          <h2 class="modal-title">New application</h2>
+          <p class="filters-subtitle">Save a job application you want to track.</p>
+        </div>
+        <button id="close-create-dialog-button" class="modal-close-button" type="button">Close</button>
+      </div>
+
+      <form id="create-form">
+        <div id="create-form-message" class="form-message hidden"></div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label" for="create-title">Title</label>
+            <input id="create-title" class="form-input" type="text" placeholder="Frontend Developer" required />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="create-company">Company</label>
+            <input id="create-company" class="form-input" type="text" placeholder="Company name" required />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="create-status">Status</label>
+            <select id="create-status" class="form-select" required>
+              <option value="applied">Applied</option>
+              <option value="interview">Interview</option>
+              <option value="offer">Offer</option>
+              <option value="rejected">Rejected</option>
+              <option value="closed">Closed</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="create-label-color">Label color</label>
+            <select id="create-label-color" class="form-select">
+              <option value="none">None</option>
+              <option value="blue">Blue</option>
+              <option value="green">Green</option>
+              <option value="yellow">Yellow</option>
+              <option value="pink">Pink</option>
+              <option value="purple">Purple</option>
+              <option value="gray">Gray</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="create-date-applied">Date applied</label>
+            <input id="create-date-applied" class="form-input" type="date" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="create-job-link">Job link</label>
+            <input id="create-job-link" class="form-input" type="url" placeholder="https://..." />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="create-location">Location</label>
+            <input id="create-location" class="form-input" type="text" placeholder="City, country" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="create-salary">Salary</label>
+            <input id="create-salary" class="form-input" type="text" placeholder="$60,000" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="create-contact-name">Contact name</label>
+            <input id="create-contact-name" class="form-input" type="text" placeholder="Hiring manager" />
+          </div>
+
+          <div class="form-group" style="grid-column: 1 / -1;">
+            <label class="form-label" for="create-notes">Notes</label>
+            <textarea id="create-notes" class="form-textarea" placeholder="Any details about this application"></textarea>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="submit-button" type="submit">Save application</button>
+          <button class="secondary-button" type="button" id="clear-create-button">Clear</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
   <script>
+    const applicationsTab = document.getElementById('applications-tab');
+    const filtersTab = document.getElementById('filters-tab');
+    const favoritesTab = document.getElementById('favorites-tab');
+
+    const applicationsContainer = document.getElementById('applications-container');
+    const favoritesContainer = document.getElementById('favorites-container');
+    const filtersResults = document.getElementById('filters-results');
+
+    const tabApplications = document.getElementById('nav-applications');
+    const tabFilters = document.getElementById('nav-filters');
+    const tabFavorites = document.getElementById('nav-favorites');
+
     const loadApplicationsButton = document.getElementById('load-applications-button');
     const applyFiltersButton = document.getElementById('apply-filters-button');
     const resetFiltersButton = document.getElementById('reset-filters-button');
 
-    const applicationsContainer = document.getElementById('applications-container');
-    const filterResultsContainer = document.getElementById('filter-results-container');
-    const favoritesContainer = document.getElementById('favorites-container');
-
-    const statusFilter = document.getElementById('status-filter');
-    const labelColorFilter = document.getElementById('label-color-filter');
-    const companyFilter = document.getElementById('company-filter');
-    const titleFilter = document.getElementById('title-filter');
-    const dateFromFilter = document.getElementById('date-from-filter');
-    const dateToFilter = document.getElementById('date-to-filter');
-
-    const tabApplications = document.getElementById('tab-applications');
-    const tabFilters = document.getElementById('tab-filters');
-    const tabFavorites = document.getElementById('tab-favorites');
-    const tabProfile = document.getElementById('tab-profile');
-
-    const applicationsTab = document.getElementById('applications-tab');
-    const filtersTab = document.getElementById('filters-tab');
-    const favoritesTab = document.getElementById('favorites-tab');
-    const profileTab = document.getElementById('profile-tab');
-
     const openCreateDialogButton = document.getElementById('open-create-dialog-button');
     const closeCreateDialogButton = document.getElementById('close-create-dialog-button');
     const createDialog = document.getElementById('create-dialog');
-    const createApplicationForm = document.getElementById('create-application-form');
-    const clearFormButton = document.getElementById('clear-form-button');
-    const formMessage = document.getElementById('form-message');
-
-    const createTitle = document.getElementById('create-title');
-    const createCompany = document.getElementById('create-company');
-    const createStatus = document.getElementById('create-status');
-    const createLabelColor = document.getElementById('create-label-color');
-    const createDateApplied = document.getElementById('create-date-applied');
-    const createLocation = document.getElementById('create-location');
-    const createSalary = document.getElementById('create-salary');
-    const createJobLink = document.getElementById('create-job-link');
-    const createContactName = document.getElementById('create-contact-name');
-    const createNotes = document.getElementById('create-notes');
+    const createForm = document.getElementById('create-form');
+    const createFormMessage = document.getElementById('create-form-message');
+    const clearCreateButton = document.getElementById('clear-create-button');
 
     const editDialog = document.getElementById('edit-dialog');
-    const closeEditDialogButton = document.getElementById('close-edit-dialog-button');
-    const editApplicationForm = document.getElementById('edit-application-form');
+    const editForm = document.getElementById('edit-form');
     const editFormMessage = document.getElementById('edit-form-message');
-
-    const editId = document.getElementById('edit-id');
-    const editTitle = document.getElementById('edit-title');
-    const editCompany = document.getElementById('edit-company');
-    const editStatus = document.getElementById('edit-status');
-    const editLabelColor = document.getElementById('edit-label-color');
-    const editDateApplied = document.getElementById('edit-date-applied');
-    const editLocation = document.getElementById('edit-location');
-    const editSalary = document.getElementById('edit-salary');
-    const editJobLink = document.getElementById('edit-job-link');
-    const editContactName = document.getElementById('edit-contact-name');
-    const editNotes = document.getElementById('edit-notes');
-
-    const openLoginDialogButton = document.getElementById('open-login-dialog-button');
-    const openRegisterDialogButton = document.getElementById('open-register-dialog-button');
-    const logoutButton = document.getElementById('logout-button');
-    const authUserBox = document.getElementById('auth-user-box');
+    const closeEditDialogButton = document.getElementById('close-edit-dialog-button');
 
     const loginDialog = document.getElementById('login-dialog');
     const registerDialog = document.getElementById('register-dialog');
+    const openLoginDialogButton = document.getElementById('open-login-dialog-button');
+    const openRegisterDialogButton = document.getElementById('open-register-dialog-button');
     const closeLoginDialogButton = document.getElementById('close-login-dialog-button');
     const closeRegisterDialogButton = document.getElementById('close-register-dialog-button');
-
     const loginForm = document.getElementById('login-form');
     const registerForm = document.getElementById('register-form');
-    const loginMessage = document.getElementById('login-message');
-    const registerMessage = document.getElementById('register-message');
+    const loginFormMessage = document.getElementById('login-form-message');
+    const registerFormMessage = document.getElementById('register-form-message');
+    const authUserBox = document.getElementById('auth-user-box');
+    const logoutButton = document.getElementById('logout-button');
 
-    const loginUsername = document.getElementById('login-username');
-    const loginPassword = document.getElementById('login-password');
-    const registerUsername = document.getElementById('register-username');
-    const registerEmail = document.getElementById('register-email');
-    const registerPassword = document.getElementById('register-password');
-
-    function normalizeDateValue(value) {
-      if (!value) return '';
-      return String(value).slice(0, 10);
-    }
+    const statusFilter = document.getElementById('status-filter');
+    const companyFilter = document.getElementById('company-filter');
+    const titleFilter = document.getElementById('title-filter');
+    const labelFilter = document.getElementById('label-filter');
+    const dateFromFilter = document.getElementById('date-from-filter');
+    const dateToFilter = document.getElementById('date-to-filter');
 
     function escapeHtml(value) {
       if (value === null || value === undefined) return '';
@@ -1134,677 +936,546 @@
         .replaceAll("'", '&#39;');
     }
 
-    function normalizeLabelColor(value) {
-      const allowedColors = ['none', 'blue', 'green', 'yellow', 'pink', 'purple', 'gray'];
-      return allowedColors.includes(value) ? value : 'none';
+    function showMessage(element, message) {
+      if (!element) return;
+      element.classList.remove('hidden');
+      element.innerHTML = `<p>${escapeHtml(message)}</p>`;
     }
 
-    function getLabelMeta(labelColor) {
-      const safeColor = normalizeLabelColor(labelColor);
-      const labelMap = {
-        none: { className: 'label-none', text: 'No color' },
-        blue: { className: 'label-blue', text: 'Blue' },
-        green: { className: 'label-green', text: 'Green' },
-        yellow: { className: 'label-yellow', text: 'Yellow' },
-        pink: { className: 'label-pink', text: 'Pink' },
-        purple: { className: 'label-purple', text: 'Purple' },
-        gray: { className: 'label-gray', text: 'Gray' },
-      };
-      return labelMap[safeColor];
+    function hideMessage(element) {
+      if (!element) return;
+      element.classList.add('hidden');
+      element.innerHTML = '';
     }
 
-    function showCreateFormMessage(message) {
-      formMessage.style.display = 'block';
-      formMessage.className = 'form-message';
-      formMessage.innerHTML = `<p>${escapeHtml(message)}</p>`;
+    function formatDate(value) {
+      if (!value) return 'Not set';
+      return value;
     }
 
-    function showEditFormMessage(message) {
-      editFormMessage.style.display = 'block';
-      editFormMessage.className = 'form-message';
-      editFormMessage.innerHTML = `<p>${escapeHtml(message)}</p>`;
+    function getStatusClass(status) {
+      return `status-${status || 'applied'}`;
     }
 
-    function showLoginMessage(message) {
-      loginMessage.style.display = 'block';
-      loginMessage.className = 'form-message';
-      loginMessage.innerHTML = `<p>${escapeHtml(message)}</p>`;
+    function getLabelClass(color) {
+      return `label-${color || 'none'}`;
     }
 
-    function showRegisterMessage(message) {
-      registerMessage.style.display = 'block';
-      registerMessage.className = 'form-message';
-      registerMessage.innerHTML = `<p>${escapeHtml(message)}</p>`;
-    }
-
-    function clearCreateForm() {
-      createApplicationForm.reset();
-      createLabelColor.value = 'none';
-      formMessage.style.display = 'none';
-      formMessage.innerHTML = '';
-    }
-
-    function openCreateDialog() {
-      createDialog.showModal();
-    }
-
-    function closeCreateDialog() {
-      createDialog.close();
-      formMessage.style.display = 'none';
-    }
-
-    function openEditDialog(application) {
-      editId.value = application.id;
-      editTitle.value = application.title || '';
-      editCompany.value = application.company || '';
-      editStatus.value = application.status || 'applied';
-      editLabelColor.value = normalizeLabelColor(application.label_color || 'none');
-      editDateApplied.value = normalizeDateValue(application.date_applied);
-      editLocation.value = application.location || '';
-      editSalary.value = application.salary || '';
-      editJobLink.value = application.job_link || '';
-      editContactName.value = application.contact_name || '';
-      editNotes.value = application.notes || '';
-      editFormMessage.style.display = 'none';
-      editFormMessage.innerHTML = '';
-      editDialog.showModal();
-    }
-
-    function closeEditDialog() {
-      editDialog.close();
-      editFormMessage.style.display = 'none';
-    }
-
-    function openLoginDialog() {
-      loginMessage.style.display = 'none';
-      loginForm.reset();
-      loginDialog.showModal();
-    }
-
-    function closeLoginDialog() {
-      loginDialog.close();
-      loginMessage.style.display = 'none';
-    }
-
-    function openRegisterDialog() {
-      registerMessage.style.display = 'none';
-      registerForm.reset();
-      registerDialog.showModal();
-    }
-
-    function closeRegisterDialog() {
-      registerDialog.close();
-      registerMessage.style.display = 'none';
-    }
-
-    function updateAuthUI(user) {
-      if (user) {
-        authUserBox.style.display = 'inline-flex';
-        authUserBox.innerHTML = `Logged in as ${escapeHtml(user.username)}`;
-        logoutButton.style.display = 'inline-block';
-        openLoginDialogButton.style.display = 'none';
-        openRegisterDialogButton.style.display = 'none';
-      } else {
-        authUserBox.style.display = 'none';
-        authUserBox.innerHTML = '';
-        logoutButton.style.display = 'none';
-        openLoginDialogButton.style.display = 'inline-block';
-        openRegisterDialogButton.style.display = 'inline-block';
-      }
-    }
-
-    function setActiveTab(tabName) {
-      applicationsTab.classList.add('hidden');
-      filtersTab.classList.add('hidden');
-      favoritesTab.classList.add('hidden');
-      profileTab.classList.add('hidden');
-
-      tabApplications.classList.remove('active');
-      tabFilters.classList.remove('active');
-      tabFavorites.classList.remove('active');
-      tabProfile.classList.remove('active');
-
-      if (tabName === 'applications') {
-        applicationsTab.classList.remove('hidden');
-        tabApplications.classList.add('active');
-      }
-
-      if (tabName === 'filters') {
-        filtersTab.classList.remove('hidden');
-        tabFilters.classList.add('active');
-      }
-
-      if (tabName === 'favorites') {
-        favoritesTab.classList.remove('hidden');
-        tabFavorites.classList.add('active');
-      }
-
-      if (tabName === 'profile') {
-        profileTab.classList.remove('hidden');
-        tabProfile.classList.add('active');
-      }
-    }
-
-    function getStatusMarkup(application) {
-      const safeStatus = escapeHtml(application.status || 'No status');
-      const statusClassMap = {
-        applied: 'status-applied',
-        interview: 'status-interview',
-        offer: 'status-offer',
-        rejected: 'status-rejected',
-        closed: 'status-closed',
-      };
-      const statusLabelMap = {
-        applied: 'Applied',
-        interview: 'Interview',
-        offer: 'Offer',
-        rejected: 'Rejected',
-        closed: 'Closed',
-      };
-
-      const statusClass = statusClassMap[application.status] || 'status-applied';
-      const statusLabel = statusLabelMap[application.status] || safeStatus;
+    function renderApplicationCard(application) {
+      const favoriteActiveClass = application.is_favorite ? 'active' : '';
+      const favoriteText = application.is_favorite ? '★ Favorite' : '☆ Favorite';
 
       return `
-        <div class="status-badge ${statusClass}">
-          <span class="status-dot"></span>
-          <span>${statusLabel}</span>
-        </div>
-      `;
-    }
-
-    function getLabelMarkup(application) {
-      const labelMeta = getLabelMeta(application.label_color || 'none');
-      return `
-        <div class="label-chip ${labelMeta.className}">
-          <span class="label-dot"></span>
-          <span>${labelMeta.text}</span>
-        </div>
-      `;
-    }
-
-    function getApplicationCardMarkup(application) {
-      const safeTitle = escapeHtml(application.title || 'No title');
-      const safeCompany = escapeHtml(application.company || 'No company');
-      const safeLocation = escapeHtml(application.location || 'Not specified');
-      const safeSalary = escapeHtml(application.salary || 'Not specified');
-      const safeDateApplied = escapeHtml(application.date_applied || 'Not specified');
-      const safeContactName = escapeHtml(application.contact_name || 'Not specified');
-      const safeNotes = escapeHtml(application.notes || 'No notes yet');
-      const safeJobLink = application.job_link
-        ? `<a href="${escapeHtml(application.job_link)}" target="_blank" rel="noopener noreferrer">${escapeHtml(application.job_link)}</a>`
-        : 'Not specified';
-
-      const isFavorite = Boolean(application.is_favorite);
-
-      return `
-        <article class="application-card">
-          <h3>${safeTitle}</h3>
-          <p class="company-name">${safeCompany}</p>
+        <article class="application-card" data-id="${application.id}">
+          <h3>${escapeHtml(application.title)}</h3>
+          <p class="company-name">${escapeHtml(application.company)}</p>
 
           <div class="meta-row">
-            ${getStatusMarkup(application)}
-            ${getLabelMarkup(application)}
+            <span class="status-badge ${getStatusClass(application.status)}">
+              <span class="status-dot"></span>
+              ${escapeHtml(application.status || 'applied')}
+            </span>
+
+            <span class="label-chip ${getLabelClass(application.label_color)}">
+              <span class="label-dot"></span>
+              ${escapeHtml(application.label_color || 'none')}
+            </span>
           </div>
 
           <div class="card-details">
             <div class="detail-row">
+              <span class="detail-label">Date applied</span>
+              <span class="detail-value">${escapeHtml(formatDate(application.date_applied))}</span>
+            </div>
+
+            <div class="detail-row">
               <span class="detail-label">Location</span>
-              <span class="detail-value">${safeLocation}</span>
+              <span class="detail-value">${escapeHtml(application.location || 'Not set')}</span>
             </div>
 
             <div class="detail-row">
               <span class="detail-label">Salary</span>
-              <span class="detail-value">${safeSalary}</span>
+              <span class="detail-value">${escapeHtml(application.salary || 'Not set')}</span>
             </div>
 
             <div class="detail-row">
-              <span class="detail-label">Date applied</span>
-              <span class="detail-value">${safeDateApplied}</span>
-            </div>
-
-            <div class="detail-row">
-              <span class="detail-label">Contact</span>
-              <span class="detail-value">${safeContactName}</span>
-            </div>
-
-            <div class="detail-row">
-              <span class="detail-label">Notes</span>
-              <span class="detail-value">${safeNotes}</span>
+              <span class="detail-label">Contact name</span>
+              <span class="detail-value">${escapeHtml(application.contact_name || 'Not set')}</span>
             </div>
 
             <div class="detail-row">
               <span class="detail-label">Job link</span>
-              <span class="detail-value">${safeJobLink}</span>
+              <span class="detail-value">
+                ${application.job_link ? `<a href="${escapeHtml(application.job_link)}" target="_blank" rel="noopener noreferrer">${escapeHtml(application.job_link)}</a>` : 'Not set'}
+              </span>
+            </div>
+
+            <div class="detail-row">
+              <span class="detail-label">Notes</span>
+              <span class="detail-value">${escapeHtml(application.notes || 'No notes')}</span>
             </div>
           </div>
 
           <div class="card-actions">
-            <button
-              type="button"
-              class="favorite-button ${isFavorite ? 'active' : ''}"
-              onclick="toggleFavorite(${application.id}, ${isFavorite})"
-            >
-              ${isFavorite ? 'Saved' : 'Favorite'}
-            </button>
-
-            <button
-              type="button"
-              class="card-action-button"
-              onclick='openEditDialog(${JSON.stringify(application).replace(/'/g, "&apos;")})'
-            >
-              Edit
-            </button>
-
-            <button
-              type="button"
-              class="delete-button"
-              onclick="deleteApplication(${application.id})"
-            >
-              Delete
-            </button>
+            <button class="card-action-button" type="button" onclick="openEditDialog(${application.id})">Edit</button>
+            <button class="favorite-button ${favoriteActiveClass}" type="button" onclick="toggleFavorite(${application.id}, ${application.is_favorite ? `'false'` : `'true'`})">${favoriteText}</button>
+            <button class="delete-button" type="button" onclick="deleteApplication(${application.id})">Delete</button>
           </div>
         </article>
       `;
     }
 
-    function renderApplicationsList(applications, targetElement, emptyMessage) {
+    function renderApplications(element, applications, emptyText) {
       if (!applications.length) {
-        targetElement.className = 'empty-box';
-        targetElement.innerHTML = `<p>${escapeHtml(emptyMessage)}</p>`;
+        element.innerHTML = `<div class="empty-box">${escapeHtml(emptyText)}</div>`;
         return;
       }
 
-      let html = '<div class="applications-grid">';
-      for (const application of applications) {
-        html += getApplicationCardMarkup(application);
-      }
-      html += '</div>';
-
-      targetElement.className = '';
-      targetElement.innerHTML = html;
+      element.innerHTML = `<div class="applications-grid">${applications.map(renderApplicationCard).join('')}</div>`;
     }
 
-    async function loadCurrentUser() {
-      try {
-        const response = await fetch('/auth/me/', { credentials: 'same-origin' });
-        if (!response.ok) throw new Error('Failed to load auth user');
+    async function requestJson(url, options = {}) {
+      const response = await fetch(url, {
+        credentials: 'same-origin',
+        ...options,
+      });
 
-        const data = await response.json();
+      const data = await response.json().catch(() => null);
 
-        if (data.authenticated) {
-          updateAuthUI(data.user);
-          await loadApplications();
-        } else {
-          updateAuthUI(null);
-          applicationsContainer.className = 'message-box';
-          applicationsContainer.innerHTML = '<p>Login to view your applications.</p>';
-        }
-      } catch (error) {
-        updateAuthUI(null);
-        applicationsContainer.className = 'message-box';
-        applicationsContainer.innerHTML = '<p>Login to view your applications.</p>';
-      }
-    }
-
-    async function registerUser(event) {
-      event.preventDefault();
-
-      const payload = {
-        username: registerUsername.value,
-        email: registerEmail.value,
-        password: registerPassword.value,
-      };
-
-      try {
-        const response = await fetch('/auth/register/', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'same-origin',
-          body: JSON.stringify(payload),
-        });
-
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error || 'Registration failed');
-
-        showRegisterMessage('Registration successful.');
-        updateAuthUI(data.user);
-        await loadApplications();
-
-        setTimeout(() => closeRegisterDialog(), 700);
-      } catch (error) {
-        showRegisterMessage(error.message || 'Registration error.');
-      }
-    }
-
-    async function loginUser(event) {
-      event.preventDefault();
-
-      const payload = {
-        username: loginUsername.value,
-        password: loginPassword.value,
-      };
-
-      try {
-        const response = await fetch('/auth/login/', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'same-origin',
-          body: JSON.stringify(payload),
-        });
-
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error || 'Login failed');
-
-        showLoginMessage('Login successful.');
-        updateAuthUI(data.user);
-        await loadApplications();
-
-        setTimeout(() => closeLoginDialog(), 700);
-      } catch (error) {
-        showLoginMessage(error.message || 'Login error.');
-      }
-    }
-
-    async function logoutUser() {
-      try {
-        const response = await fetch('/auth/logout/', {
-          method: 'POST',
-          credentials: 'same-origin',
-        });
-
-        if (!response.ok) throw new Error('Logout failed');
-
-        updateAuthUI(null);
-        applicationsContainer.className = 'message-box';
-        applicationsContainer.innerHTML = '<p>You have logged out. Please login again to view your applications.</p>';
-        favoritesContainer.className = 'message-box';
-        favoritesContainer.innerHTML = '<p>You have no favorite applications yet.</p>';
-      } catch (error) {
-        authUserBox.style.display = 'inline-flex';
-        authUserBox.innerHTML = 'Logout error.';
-      }
-    }
-
-    async function fetchApplicationsData() {
-      const params = new URLSearchParams();
-
-      if (statusFilter.value) params.append('status', statusFilter.value);
-      if (companyFilter.value) params.append('company', companyFilter.value);
-      if (titleFilter.value) params.append('title', titleFilter.value);
-      if (dateFromFilter.value) params.append('date_applied_from', dateFromFilter.value);
-      if (dateToFilter.value) params.append('date_applied_to', dateToFilter.value);
-
-      let url = '/applications/';
-      if (params.toString()) {
-        url += `?${params.toString()}`;
+      if (!response.ok) {
+        throw new Error((data && data.error) || 'Request failed');
       }
 
-      const response = await fetch(url, { credentials: 'same-origin' });
-      const data = await response.json();
-
-      if (response.status === 401) throw new Error('unauthorized');
-      if (!response.ok) throw new Error(data.error || 'Failed to load applications');
-
-      let applications = data.applications || [];
-
-      if (labelColorFilter.value) {
-        applications = applications.filter((application) => {
-          const color = normalizeLabelColor(application.label_color || 'none');
-          return color === labelColorFilter.value;
-        });
-      }
-
-      return applications;
+      return data;
     }
 
     async function loadApplications() {
-      applicationsContainer.className = 'message-box';
-      applicationsContainer.innerHTML = '<p>Loading applications...</p>';
+      applicationsContainer.innerHTML = '<div class="message-box">Loading applications...</div>';
 
       try {
-        const applications = await fetchApplicationsData();
-        renderApplicationsList(applications, applicationsContainer, 'No applications found.');
+        const data = await requestJson('/applications/');
+        renderApplications(applicationsContainer, data.applications || [], 'No applications yet.');
       } catch (error) {
-        if (error.message === 'unauthorized') {
-          applicationsContainer.className = 'message-box';
-          applicationsContainer.innerHTML = '<p>Login to view your applications.</p>';
-          return;
-        }
-
-        applicationsContainer.className = 'message-box';
-        applicationsContainer.innerHTML = '<p>Error loading applications.</p>';
+        applicationsContainer.innerHTML = `<div class="empty-box">${escapeHtml(error.message)}</div>`;
       }
     }
 
-    async function applyFiltersInsideFiltersTab() {
-      filterResultsContainer.className = 'message-box';
-      filterResultsContainer.innerHTML = '<p>Searching applications...</p>';
+    async function loadFavorites() {
+      favoritesContainer.innerHTML = '<div class="message-box">Loading favorites...</div>';
 
       try {
-        const applications = await fetchApplicationsData();
-        renderApplicationsList(applications, filterResultsContainer, 'No applications found for these filters.');
+        const data = await requestJson('/favorites/');
+        renderApplications(favoritesContainer, data.applications || [], 'No favorite applications yet.');
       } catch (error) {
-        if (error.message === 'unauthorized') {
-          filterResultsContainer.className = 'message-box';
-          filterResultsContainer.innerHTML = '<p>Login to use filters.</p>';
-          return;
-        }
+        favoritesContainer.innerHTML = `<div class="empty-box">${escapeHtml(error.message)}</div>`;
+      }
+    }
 
-        filterResultsContainer.className = 'message-box';
-        filterResultsContainer.innerHTML = '<p>Error loading filtered applications.</p>';
+    async function applyFilters() {
+      filtersResults.innerHTML = '<div class="message-box">Loading filtered results...</div>';
+
+      const params = new URLSearchParams();
+
+      if (statusFilter.value) params.append('status', statusFilter.value);
+      if (companyFilter.value.trim()) params.append('company', companyFilter.value.trim());
+      if (titleFilter.value.trim()) params.append('title', titleFilter.value.trim());
+      if (labelFilter.value) params.append('label_color', labelFilter.value);
+      if (dateFromFilter.value) params.append('date_from', dateFromFilter.value);
+      if (dateToFilter.value) params.append('date_to', dateToFilter.value);
+
+      try {
+        const query = params.toString();
+        const url = query ? `/applications/?${query}` : '/applications/';
+        const data = await requestJson(url);
+        renderApplications(filtersResults, data.applications || [], 'No applications matched these filters.');
+      } catch (error) {
+        filtersResults.innerHTML = `<div class="empty-box">${escapeHtml(error.message)}</div>`;
       }
     }
 
     function resetFilters() {
       statusFilter.value = '';
-      labelColorFilter.value = '';
       companyFilter.value = '';
       titleFilter.value = '';
+      labelFilter.value = '';
       dateFromFilter.value = '';
       dateToFilter.value = '';
-      filterResultsContainer.className = 'message-box';
-      filterResultsContainer.innerHTML = '<p>Apply filters to see matching applications here.</p>';
+      filtersResults.innerHTML = '';
     }
 
-    async function toggleFavorite(applicationId, currentValue) {
-      try {
-        const response = await fetch(`/applications/${applicationId}/favorite/`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'same-origin',
-          body: JSON.stringify({
-            is_favorite: !currentValue,
-          }),
-        });
-
-        const data = await response.json().catch(() => null);
-
-        if (!response.ok) {
-          throw new Error((data && data.error) || 'Failed to update favorite');
-        }
-
-        await loadApplications();
-
-        if (!favoritesTab.classList.contains('hidden')) {
-          await loadFavoritesOnly();
-        }
-
-        if (!filtersTab.classList.contains('hidden') && filterResultsContainer.innerHTML.trim() !== '') {
-          await applyFiltersInsideFiltersTab();
-        }
-      } catch (error) {
-        alert(error.message || 'Favorite update error.');
-      }
+    function openDialog(dialog) {
+      if (dialog && !dialog.open) dialog.showModal();
     }
 
-    async function loadFavoritesOnly() {
-      favoritesContainer.className = 'message-box';
-      favoritesContainer.innerHTML = '<p>Loading favorites...</p>';
+    function closeDialog(dialog) {
+      if (dialog && dialog.open) dialog.close();
+    }
 
+    async function openEditDialog(id) {
       try {
-        const response = await fetch('/favorites/', {
-          credentials: 'same-origin',
-        });
+        const data = await requestJson(`/applications/${id}/`);
 
-        const data = await response.json().catch(() => null);
+        const editId = document.getElementById('edit-id');
+        const editTitle = document.getElementById('edit-title');
+        const editCompany = document.getElementById('edit-company');
+        const editStatus = document.getElementById('edit-status');
+        const editLabelColor = document.getElementById('edit-label-color');
+        const editDateApplied = document.getElementById('edit-date-applied');
+        const editJobLink = document.getElementById('edit-job-link');
+        const editLocation = document.getElementById('edit-location');
+        const editSalary = document.getElementById('edit-salary');
+        const editContactName = document.getElementById('edit-contact-name');
+        const editNotes = document.getElementById('edit-notes');
 
-        if (response.status === 401) {
-          favoritesContainer.className = 'message-box';
-          favoritesContainer.innerHTML = '<p>Login to view favorites.</p>';
+        if (
+          !editId || !editTitle || !editCompany || !editStatus || !editLabelColor ||
+          !editDateApplied || !editJobLink || !editLocation || !editSalary ||
+          !editContactName || !editNotes
+        ) {
+          alert('Edit form is not configured yet.');
           return;
         }
 
-        if (!response.ok) {
-          throw new Error((data && data.error) || 'Failed to load favorites');
-        }
+        editId.value = data.id;
+        editTitle.value = data.title || '';
+        editCompany.value = data.company || '';
+        editStatus.value = data.status || 'applied';
+        editLabelColor.value = data.label_color || 'none';
+        editDateApplied.value = data.date_applied || '';
+        editJobLink.value = data.job_link || '';
+        editLocation.value = data.location || '';
+        editSalary.value = data.salary || '';
+        editContactName.value = data.contact_name || '';
+        editNotes.value = data.notes || '';
 
-        const applications = (data && data.applications) || [];
-        renderApplicationsList(applications, favoritesContainer, 'You have no favorite applications yet.');
+        hideMessage(editFormMessage);
+        openDialog(editDialog);
       } catch (error) {
-        favoritesContainer.className = 'message-box';
-        favoritesContainer.innerHTML = '<p>Error loading favorites.</p>';
+        alert(error.message);
       }
     }
 
-    async function createApplication(event) {
-      event.preventDefault();
-
-      const payload = {
-        title: createTitle.value,
-        company: createCompany.value,
-        status: createStatus.value,
-        label_color: normalizeLabelColor(createLabelColor.value),
-        date_applied: createDateApplied.value,
-        location: createLocation.value,
-        salary: createSalary.value,
-        job_link: createJobLink.value,
-        contact_name: createContactName.value,
-        notes: createNotes.value,
-      };
-
-      try {
-        const response = await fetch('/applications/', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'same-origin',
-          body: JSON.stringify(payload),
-        });
-
-        const data = await response.json().catch(() => null);
-        if (!response.ok) throw new Error((data && data.error) || 'Failed to create application');
-
-        clearCreateForm();
-        showCreateFormMessage('Application created successfully.');
-        await loadApplications();
-
-        setTimeout(() => {
-          createDialog.close();
-          formMessage.style.display = 'none';
-        }, 700);
-      } catch (error) {
-        showCreateFormMessage(error.message || 'Error creating application.');
-      }
-    }
-
-    async function updateApplication(event) {
-      event.preventDefault();
-
-      const applicationId = editId.value;
-
-      const payload = {
-        title: editTitle.value,
-        company: editCompany.value,
-        status: editStatus.value,
-        label_color: normalizeLabelColor(editLabelColor.value),
-        date_applied: editDateApplied.value,
-        location: editLocation.value,
-        salary: editSalary.value,
-        job_link: editJobLink.value,
-        contact_name: editContactName.value,
-        notes: editNotes.value,
-      };
-
-      try {
-        const response = await fetch(`/applications/${applicationId}/`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'same-origin',
-          body: JSON.stringify(payload),
-        });
-
-        const data = await response.json().catch(() => null);
-        if (!response.ok) throw new Error((data && data.error) || 'Failed to update application');
-
-        showEditFormMessage('Application updated successfully.');
-        await loadApplications();
-
-        if (!favoritesTab.classList.contains('hidden')) {
-          await loadFavoritesOnly();
-        }
-
-        setTimeout(() => closeEditDialog(), 700);
-      } catch (error) {
-        showEditFormMessage(error.message || 'Error updating application.');
-      }
-    }
-
-    async function deleteApplication(applicationId) {
+    async function deleteApplication(id) {
       const confirmed = window.confirm('Delete this application?');
       if (!confirmed) return;
 
       try {
-        const response = await fetch(`/applications/${applicationId}/`, {
+        const response = await fetch(`/applications/${id}/`, {
           method: 'DELETE',
           credentials: 'same-origin',
         });
 
-        if (!response.ok && response.status !== 204) {
-          throw new Error('Failed to delete application');
+        if (!response.ok) {
+          throw new Error('Could not delete application.');
         }
 
         await loadApplications();
-        await loadFavoritesOnly();
+        await loadFavorites();
       } catch (error) {
-        applicationsContainer.className = 'message-box';
-        applicationsContainer.innerHTML = '<p>Error deleting application.</p>';
+        alert(error.message);
       }
     }
+
+    async function toggleFavorite(id, newValue) {
+      try {
+        const isFavorite = newValue === 'true';
+        await requestJson(`/favorites/${id}/`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ is_favorite: isFavorite }),
+        });
+
+        await loadApplications();
+        await loadFavorites();
+      } catch (error) {
+        alert(error.message);
+      }
+    }
+
+    async function checkAuth() {
+      try {
+        const data = await requestJson('/auth/me/');
+
+        if (data.authenticated && data.user) {
+          authUserBox.classList.remove('hidden');
+          authUserBox.textContent = data.user.username;
+          logoutButton.classList.remove('hidden');
+          openLoginDialogButton.style.display = 'none';
+          openRegisterDialogButton.style.display = 'none';
+
+          await loadApplications();
+          await loadFavorites();
+        } else {
+          authUserBox.classList.add('hidden');
+          logoutButton.classList.add('hidden');
+          openLoginDialogButton.style.display = 'inline-flex';
+          openRegisterDialogButton.style.display = 'inline-flex';
+          applicationsContainer.innerHTML = 'Press Load applications to show your saved job applications.';
+          favoritesContainer.innerHTML = 'Loading favorites...';
+        }
+      } catch (error) {
+        authUserBox.classList.add('hidden');
+        logoutButton.classList.add('hidden');
+        openLoginDialogButton.style.display = 'inline-flex';
+        openRegisterDialogButton.style.display = 'inline-flex';
+      }
+    }
+
+    function openApplicationsTab() {
+      applicationsTab.classList.remove('hidden');
+      filtersTab.classList.add('hidden');
+      favoritesTab.classList.add('hidden');
+
+      tabApplications.classList.add('active');
+      tabFilters.classList.remove('active');
+      tabFavorites.classList.remove('active');
+
+      loadApplications();
+    }
+
+    function openFiltersTab() {
+      applicationsTab.classList.add('hidden');
+      filtersTab.classList.remove('hidden');
+      favoritesTab.classList.add('hidden');
+
+      tabApplications.classList.remove('active');
+      tabFilters.classList.add('active');
+      tabFavorites.classList.remove('active');
+    }
+
+    function openFavoritesTab() {
+      applicationsTab.classList.add('hidden');
+      filtersTab.classList.add('hidden');
+      favoritesTab.classList.remove('hidden');
+
+      tabApplications.classList.remove('active');
+      tabFilters.classList.remove('active');
+      tabFavorites.classList.add('active');
+
+      loadFavorites();
+    }
+
+    function handleHashTab() {
+      if (window.location.hash === '#filters') {
+        openFiltersTab();
+        return;
+      }
+
+      if (window.location.hash === '#favorites') {
+        openFavoritesTab();
+        return;
+      }
+
+      openApplicationsTab();
+    }
+
+    if (createForm) {
+      createForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        hideMessage(createFormMessage);
+
+        const payload = {
+          title: document.getElementById('create-title')?.value.trim() || '',
+          company: document.getElementById('create-company')?.value.trim() || '',
+          status: document.getElementById('create-status')?.value || 'applied',
+          label_color: document.getElementById('create-label-color')?.value || 'none',
+          date_applied: document.getElementById('create-date-applied')?.value || '',
+          job_link: document.getElementById('create-job-link')?.value.trim() || '',
+          location: document.getElementById('create-location')?.value.trim() || '',
+          salary: document.getElementById('create-salary')?.value.trim() || '',
+          contact_name: document.getElementById('create-contact-name')?.value.trim() || '',
+          notes: document.getElementById('create-notes')?.value.trim() || '',
+        };
+
+        try {
+          await requestJson('/applications/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+
+          createForm.reset();
+          closeDialog(createDialog);
+          await loadApplications();
+          await loadFavorites();
+        } catch (error) {
+          showMessage(createFormMessage, error.message);
+        }
+      });
+    }
+
+    if (clearCreateButton && createForm) {
+      clearCreateButton.addEventListener('click', () => {
+        createForm.reset();
+        hideMessage(createFormMessage);
+      });
+    }
+
+    if (editForm) {
+      editForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        hideMessage(editFormMessage);
+
+        const id = document.getElementById('edit-id')?.value;
+
+        const payload = {
+          title: document.getElementById('edit-title')?.value.trim() || '',
+          company: document.getElementById('edit-company')?.value.trim() || '',
+          status: document.getElementById('edit-status')?.value || 'applied',
+          label_color: document.getElementById('edit-label-color')?.value || 'none',
+          date_applied: document.getElementById('edit-date-applied')?.value || '',
+          job_link: document.getElementById('edit-job-link')?.value.trim() || '',
+          location: document.getElementById('edit-location')?.value.trim() || '',
+          salary: document.getElementById('edit-salary')?.value.trim() || '',
+          contact_name: document.getElementById('edit-contact-name')?.value.trim() || '',
+          notes: document.getElementById('edit-notes')?.value.trim() || '',
+        };
+
+        try {
+          await requestJson(`/applications/${id}/`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+
+          closeDialog(editDialog);
+          await loadApplications();
+          await loadFavorites();
+        } catch (error) {
+          showMessage(editFormMessage, error.message);
+        }
+      });
+    }
+
+    if (loginForm) {
+      loginForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        hideMessage(loginFormMessage);
+
+        const payload = {
+          username: document.getElementById('login-username')?.value.trim() || '',
+          password: document.getElementById('login-password')?.value || '',
+        };
+
+        try {
+          await requestJson('/auth/login/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+
+          closeDialog(loginDialog);
+          loginForm.reset();
+          await checkAuth();
+        } catch (error) {
+          showMessage(loginFormMessage, error.message);
+        }
+      });
+    }
+
+    if (registerForm) {
+      registerForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        hideMessage(registerFormMessage);
+
+        const payload = {
+          username: document.getElementById('register-username')?.value.trim() || '',
+          email: document.getElementById('register-email')?.value.trim() || '',
+          password: document.getElementById('register-password')?.value || '',
+        };
+
+        try {
+          await requestJson('/auth/register/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+
+          closeDialog(registerDialog);
+          registerForm.reset();
+          await checkAuth();
+        } catch (error) {
+          showMessage(registerFormMessage, error.message);
+        }
+      });
+    }
+
+    if (logoutButton) {
+      logoutButton.addEventListener('click', async () => {
+        try {
+          await requestJson('/auth/logout/', {
+            method: 'POST',
+          });
+
+          await checkAuth();
+        } catch (error) {
+          alert(error.message);
+        }
+      });
+    }
+
+    if (loadApplicationsButton) {
+      loadApplicationsButton.addEventListener('click', loadApplications);
+    }
+    if (applyFiltersButton) {
+      applyFiltersButton.addEventListener('click', applyFilters);
+    }
+    if (resetFiltersButton) {
+      resetFiltersButton.addEventListener('click', resetFilters);
+    }
+
+    if (tabApplications) {
+      tabApplications.addEventListener('click', () => {
+        window.location.hash = '';
+        openApplicationsTab();
+      });
+    }
+
+    if (tabFilters) {
+      tabFilters.addEventListener('click', () => {
+        window.location.hash = '#filters';
+        openFiltersTab();
+      });
+    }
+
+    if (tabFavorites) {
+      tabFavorites.addEventListener('click', () => {
+        window.location.hash = '#favorites';
+        openFavoritesTab();
+      });
+    }
+
+    if (openCreateDialogButton) {
+      openCreateDialogButton.addEventListener('click', () => openDialog(createDialog));
+    }
+    if (closeCreateDialogButton) {
+      closeCreateDialogButton.addEventListener('click', () => closeDialog(createDialog));
+    }
+    if (closeEditDialogButton) {
+      closeEditDialogButton.addEventListener('click', () => closeDialog(editDialog));
+    }
+
+    if (openLoginDialogButton) {
+      openLoginDialogButton.addEventListener('click', () => openDialog(loginDialog));
+    }
+    if (openRegisterDialogButton) {
+      openRegisterDialogButton.addEventListener('click', () => openDialog(registerDialog));
+    }
+    if (closeLoginDialogButton) {
+      closeLoginDialogButton.addEventListener('click', () => closeDialog(loginDialog));
+    }
+    if (closeRegisterDialogButton) {
+      closeRegisterDialogButton.addEventListener('click', () => closeDialog(registerDialog));
+    }
+
+    window.addEventListener('hashchange', handleHashTab);
 
     window.openEditDialog = openEditDialog;
     window.deleteApplication = deleteApplication;
     window.toggleFavorite = toggleFavorite;
 
-    tabApplications.addEventListener('click', () => setActiveTab('applications'));
-    tabFilters.addEventListener('click', () => setActiveTab('filters'));
-    tabFavorites.addEventListener('click', async () => {
-      setActiveTab('favorites');
-      await loadFavoritesOnly();
-    });
-    tabProfile.addEventListener('click', () => setActiveTab('profile'));
-
-    loadApplicationsButton.addEventListener('click', loadApplications);
-    applyFiltersButton.addEventListener('click', applyFiltersInsideFiltersTab);
-    resetFiltersButton.addEventListener('click', resetFilters);
-
-    openCreateDialogButton.addEventListener('click', openCreateDialog);
-    closeCreateDialogButton.addEventListener('click', closeCreateDialog);
-    closeEditDialogButton.addEventListener('click', closeEditDialog);
-
-    openLoginDialogButton.addEventListener('click', openLoginDialog);
-    openRegisterDialogButton.addEventListener('click', openRegisterDialog);
-    closeLoginDialogButton.addEventListener('click', closeLoginDialog);
-    closeRegisterDialogButton.addEventListener('click', closeRegisterDialog);
-
-    createApplicationForm.addEventListener('submit', createApplication);
-    clearFormButton.addEventListener('click', clearCreateForm);
-    editApplicationForm.addEventListener('submit', updateApplication);
-
-    loginForm.addEventListener('submit', loginUser);
-    registerForm.addEventListener('submit', registerUser);
-    logoutButton.addEventListener('click', logoutUser);
-
-    loadCurrentUser();
+    checkAuth();
+    handleHashTab();
   </script>
 </body>
 </html>

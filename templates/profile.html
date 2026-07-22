@@ -1,617 +1,1021 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile | Job Tracker</title>
-    <style>
-        * {
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile - Job Tracker</title>
+  <style>
+    * { box-sizing: border-box; }
 
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: linear-gradient(180deg, #f4f4f5 0%, #e9e9ec 100%);
-            color: #111111;
-        }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(180deg, #f4f4f5 0%, #e9e9ec 100%);
+      color: #111111;
+    }
 
-        .page {
-            max-width: 1120px;
-            margin: 0 auto;
-            padding: 32px 20px 80px;
-        }
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
 
-        .topbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 16px;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
-        }
+    .page {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 32px 20px 80px;
+    }
 
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
+    .top-shell,
+    .profile-shell,
+    .resumes-shell,
+    .info-box,
+    .stat-box,
+    .message-box,
+    .form-message,
+    .dialog-card {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 32px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08), 0 8px 20px rgba(0, 0, 0, 0.05);
+      backdrop-filter: blur(12px);
+    }
 
-        .brand-mark {
-            width: 56px;
-            height: 56px;
-            border-radius: 18px;
-            background: linear-gradient(180deg, #ffffff 0%, #f1f1f1 100%);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 10px 25px rgba(0, 0, 0, 0.12);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+    .top-shell {
+      padding: 18px 22px;
+      margin-bottom: 20px;
+    }
 
-        .brand-dot {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: #111111;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            font-weight: 700;
-        }
+    .top-shell-row {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 18px;
+    }
 
-        .brand-text h1 {
-            margin: 0;
-            font-size: 28px;
-            line-height: 1.1;
-        }
+    .brand-block {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      min-width: 0;
+    }
 
-        .brand-text p {
-            margin: 6px 0 0;
-            color: #666666;
-            font-size: 14px;
-        }
+    .logo-box {
+      width: 84px;
+      height: 84px;
+      border-radius: 24px;
+      background: linear-gradient(180deg, #ffffff 0%, #f1f1f1 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 10px 25px rgba(0, 0, 0, 0.12);
+      flex-shrink: 0;
+    }
 
-        .nav-links {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
+    .logo-circle {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: #111111;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      font-weight: bold;
+      box-shadow: inset 0 2px 6px rgba(255, 255, 255, 0.12), 0 6px 12px rgba(0, 0, 0, 0.25);
+    }
 
-        .nav-link,
-        .main-button,
-        .secondary-button,
-        .submit-button {
-            border: none;
-            padding: 13px 20px;
-            border-radius: 999px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
+    .brand-copy h1 {
+      margin: 0;
+      font-size: 26px;
+      line-height: 1.1;
+      white-space: nowrap;
+    }
 
-        .nav-link,
-        .secondary-button {
-            border: 1px solid #d7d7db;
-            background: rgba(255, 255, 255, 0.82);
-            color: #111111;
-        }
+    .top-nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      min-width: 0;
+    }
 
-        .nav-link.active,
-        .main-button,
-        .submit-button {
-            background: #111111;
-            color: white;
-            box-shadow: 0 12px 22px rgba(0, 0, 0, 0.18);
-        }
+    .nav-button {
+      border: 1px solid #d7d7db;
+      background: rgba(255, 255, 255, 0.85);
+      color: #111111;
+      min-height: 62px;
+      padding: 0 24px;
+      border-radius: 999px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
 
-        .nav-link:hover,
-        .secondary-button:hover {
-            background: white;
-        }
+    .nav-button.active {
+      background: #111111;
+      color: white;
+      border-color: #111111;
+      box-shadow: 0 12px 22px rgba(0, 0, 0, 0.18);
+    }
 
-        .main-button:hover,
-        .submit-button:hover {
-            background: #000000;
-        }
+    .auth-block {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
 
-        .hero-card,
-        .profile-card,
-        .stats-card,
-        .edit-card,
-        .message-box {
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 32px;
-            padding: 28px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08), 0 8px 20px rgba(0, 0, 0, 0.05);
-            backdrop-filter: blur(12px);
-        }
+    .user-pill {
+      min-height: 62px;
+      padding: 0 24px;
+      border-radius: 999px;
+      border: 1px solid #d7d7db;
+      background: rgba(255, 255, 255, 0.8);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      color: #111111;
+      white-space: nowrap;
+    }
 
-        .hero-card {
-            margin-bottom: 24px;
-        }
+    .secondary-button,
+    .main-button,
+    .submit-button,
+    .modal-close-button,
+    .upload-button {
+      border: none;
+      padding: 14px 22px;
+      border-radius: 999px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
 
-        .hero-card h2 {
-            margin: 0 0 10px;
-            font-size: 34px;
-            line-height: 1.1;
-        }
+    .main-button,
+    .submit-button,
+    .upload-button {
+      background: #111111;
+      color: white;
+      box-shadow: 0 12px 22px rgba(0, 0, 0, 0.18);
+    }
 
-        .hero-card p {
-            margin: 0;
-            font-size: 16px;
-            color: #555555;
-            max-width: 760px;
-        }
+    .secondary-button,
+    .modal-close-button {
+      border: 1px solid #d7d7db;
+      background: rgba(255, 255, 255, 0.8);
+      color: #111111;
+    }
 
-        .content-grid {
-            display: grid;
-            grid-template-columns: 1.1fr 0.9fr;
-            gap: 24px;
-            align-items: start;
-        }
+    .section-title {
+      margin: 0 0 18px;
+      font-size: 24px;
+    }
 
-        .left-column,
-        .right-column {
-            display: grid;
-            gap: 24px;
-        }
+    .profile-message-space {
+      margin-bottom: 16px;
+    }
 
-        .profile-head {
-            display: flex;
-            align-items: center;
-            gap: 18px;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
-        }
+    .profile-shell {
+      padding: 20px;
+      margin-bottom: 20px;
+    }
 
-        .avatar {
-            width: 78px;
-            height: 78px;
-            border-radius: 24px;
-            background: #111111;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 30px;
-            font-weight: 700;
-            flex-shrink: 0;
-            box-shadow: 0 16px 30px rgba(0, 0, 0, 0.18);
-        }
+    .profile-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
 
-        .profile-meta h3 {
-            margin: 0 0 6px;
-            font-size: 28px;
-            line-height: 1.1;
-        }
+    .profile-head {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      min-width: 0;
+    }
 
-        .profile-meta p {
-            margin: 0;
-            color: #666666;
-            font-size: 15px;
-        }
+    .avatar-box {
+      width: 72px;
+      height: 72px;
+      border-radius: 22px;
+      background: #111111;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 34px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
 
-        .section-title {
-            margin: 0 0 18px;
-            font-size: 24px;
-        }
+    .profile-name {
+      margin: 0;
+      font-size: 22px;
+    }
 
-        .info-grid,
-        .stats-grid {
-            display: grid;
-            gap: 14px;
-        }
+    .profile-email-top {
+      margin: 4px 0 0;
+      color: #666666;
+      font-size: 15px;
+      word-break: break-word;
+    }
 
-        .info-row,
-        .stat-box {
-            background: #f5f5f7;
-            border-radius: 18px;
-            padding: 16px 18px;
-            border: 1px solid #ececef;
-        }
+    .profile-settings-button {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: 1px solid #d7d7db;
+      background: rgba(255, 255, 255, 0.8);
+      font-size: 20px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
 
-        .info-label,
-        .stat-label,
-        .form-label {
-            display: block;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: #7a7a7a;
-            font-weight: 700;
-            margin-bottom: 6px;
-        }
+    .profile-content-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 18px;
+      align-items: start;
+    }
 
-        .info-value {
-            font-size: 16px;
-            color: #111111;
-            word-break: break-word;
-        }
+    .column-title {
+      margin: 0 0 12px;
+      font-size: 20px;
+    }
 
-        .stats-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
+    .info-stack {
+      display: grid;
+      gap: 12px;
+    }
 
-        .stat-number {
-            font-size: 28px;
-            font-weight: 700;
-            line-height: 1;
-            margin-bottom: 8px;
-        }
+    .info-box {
+      padding: 16px 18px;
+      border-radius: 20px;
+      background: #f5f5f7;
+      box-shadow: none;
+    }
 
-        .edit-card form {
-            display: grid;
-            gap: 16px;
-        }
+    .info-label,
+    .stat-label,
+    .resume-label {
+      display: block;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #7a7a7a;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
 
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
+    .info-value {
+      font-size: 18px;
+      color: #111111;
+      word-break: break-word;
+    }
 
-        .form-input {
-            width: 100%;
-            border: 1px solid #dddddf;
-            background: #f7f7f8;
-            border-radius: 18px;
-            padding: 14px 16px;
-            font-size: 14px;
-            color: #111111;
-            outline: none;
-            transition: all 0.2s ease;
-        }
+    .stats-panel {
+      background: rgba(255, 255, 255, 0.72);
+      border-radius: 28px;
+      padding: 16px;
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.06);
+    }
 
-        .form-input:focus {
-            border-color: #111111;
-            background: white;
-        }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
 
-        .form-actions {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-top: 6px;
-        }
+    .stat-box {
+      background: #f5f5f7;
+      border-radius: 20px;
+      padding: 16px 18px;
+      box-shadow: none;
+    }
 
-        .message-box {
-            margin-top: 18px;
-            padding: 16px 18px;
-            border-radius: 20px;
-            color: #444444;
-        }
+    .stat-value {
+      font-size: 36px;
+      font-weight: 700;
+      line-height: 1;
+    }
 
-        .hidden {
-            display: none;
-        }
+    .actions-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
 
-        .loading-text {
-            color: #666666;
-            font-size: 15px;
-        }
+    .resumes-shell {
+      padding: 20px;
+    }
 
-        @media (max-width: 860px) {
-            .content-grid {
-                grid-template-columns: 1fr;
-            }
-        }
+    .resumes-top {
+      margin-bottom: 18px;
+    }
 
-        @media (max-width: 700px) {
-            .page {
-                padding: 24px 16px 56px;
-            }
+    .resumes-subtitle {
+      margin: 6px 0 0;
+      font-size: 14px;
+      color: #666666;
+    }
 
-            .hero-card,
-            .profile-card,
-            .stats-card,
-            .edit-card,
-            .message-box {
-                padding: 22px;
-                border-radius: 24px;
-            }
+    .resume-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      align-items: end;
+    }
 
-            .hero-card h2 {
-                font-size: 28px;
-            }
+    .resume-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
 
-            .brand-text h1 {
-                font-size: 24px;
-            }
+    .resume-input,
+    .form-input,
+    .resume-textarea {
+      width: 100%;
+      border: 1px solid #dddddf;
+      background: #f7f7f8;
+      border-radius: 18px;
+      padding: 14px 16px;
+      font-size: 14px;
+      color: #111111;
+      outline: none;
+      transition: all 0.2s ease;
+      font-family: Arial, sans-serif;
+    }
 
-            .profile-meta h3 {
-                font-size: 24px;
-            }
+    .resume-input:focus,
+    .form-input:focus,
+    .resume-textarea:focus {
+      border-color: #111111;
+      background: white;
+    }
 
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
+    .resume-textarea {
+      min-height: 110px;
+      resize: vertical;
+      grid-column: 1 / -1;
+    }
 
-            .avatar {
-                width: 68px;
-                height: 68px;
-                font-size: 26px;
-                border-radius: 20px;
-            }
-        }
-    </style>
+    .resume-actions {
+      display: flex;
+      justify-content: center;
+      margin-top: 18px;
+    }
+
+    .message-box,
+    .form-message {
+      padding: 20px;
+      color: #444444;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .modal-dialog {
+      width: min(560px, calc(100vw - 32px));
+      border: none;
+      padding: 0;
+      background: transparent;
+    }
+
+    .modal-dialog::backdrop {
+      background: rgba(17, 17, 17, 0.38);
+      backdrop-filter: blur(6px);
+    }
+
+    .dialog-card {
+      background: rgba(255, 255, 255, 0.96);
+      border-radius: 32px;
+      padding: 28px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.14), 0 8px 24px rgba(0, 0, 0, 0.08);
+    }
+
+    .dialog-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .modal-title {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .panel-subtitle {
+      margin: 6px 0 0;
+      font-size: 14px;
+      color: #666666;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #7a7a7a;
+      font-weight: 700;
+    }
+
+    @media (max-width: 1180px) {
+      .top-shell-row {
+        grid-template-columns: 1fr;
+        align-items: stretch;
+      }
+
+      .top-nav { justify-content: flex-start; }
+      .auth-block { justify-content: flex-start; }
+
+      .profile-content-grid,
+      .resume-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .page {
+        padding: 24px 16px 60px;
+      }
+
+      .top-shell,
+      .profile-shell,
+      .resumes-shell,
+      .dialog-card {
+        padding: 24px;
+        border-radius: 24px;
+      }
+
+      .top-nav,
+      .auth-block,
+      .actions-row,
+      .resume-actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .nav-button,
+      .user-pill,
+      .secondary-button,
+      .main-button,
+      .upload-button {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .logo-box {
+        width: 72px;
+        height: 72px;
+        border-radius: 20px;
+      }
+
+      .logo-circle {
+        width: 50px;
+        height: 50px;
+        font-size: 24px;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .profile-top {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .dialog-top {
+        flex-direction: column;
+        align-items: stretch;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="page">
-        <header class="topbar">
-            <div class="brand">
-                <div class="brand-mark">
-                    <div class="brand-dot">J</div>
-                </div>
-
-                <div class="brand-text">
-                    <h1>Job Tracker</h1>
-                    <p>Your profile and application progress.</p>
-                </div>
-            </div>
-
-            <nav class="nav-links">
-                <a href="/" class="nav-link">Home</a>
-                <a href="/dashboard/" class="nav-link">Dashboard</a>
-                <a href="/applications-page/" class="nav-link">Applications</a>
-                <a href="/filters/" class="nav-link">Filters</a>
-                <a href="/profile/" class="nav-link active">Profile</a>
-            </nav>
-        </header>
-
-        <section class="hero-card">
-            <h2>Profile</h2>
-            <p>
-                Here you can see your account details and how your job search is going right now.
-            </p>
-        </section>
-
-        <div class="content-grid">
-            <div class="left-column">
-                <section class="profile-card">
-                    <div class="profile-head">
-                        <div class="avatar" id="profile-avatar">U</div>
-
-                        <div class="profile-meta">
-                            <h3 id="profile-username">Loading...</h3>
-                            <p id="profile-email">Please wait while profile data loads.</p>
-                        </div>
-                    </div>
-
-                    <h2 class="section-title">Account information</h2>
-
-                    <div class="info-grid">
-                        <div class="info-row">
-                            <span class="info-label">Username</span>
-                            <span class="info-value" id="info-username">Loading...</span>
-                        </div>
-
-                        <div class="info-row">
-                            <span class="info-label">Email</span>
-                            <span class="info-value" id="info-email">Loading...</span>
-                        </div>
-
-                        <div class="info-row">
-                            <span class="info-label">Account status</span>
-                            <span class="info-value">Authenticated user</span>
-                        </div>
-                    </div>
-                </section>
-
-                <section class="edit-card">
-                    <h2 class="section-title">Edit profile</h2>
-
-                    <form id="profile-form">
-                        <div class="form-group">
-                            <label class="form-label" for="edit-username">Username</label>
-                            <input id="edit-username" class="form-input" type="text" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label" for="edit-email">Email</label>
-                            <input id="edit-email" class="form-input" type="email">
-                        </div>
-
-                        <div class="form-actions">
-                            <button type="submit" class="submit-button">Save changes</button>
-                            <button type="button" id="reload-profile-button" class="secondary-button">Reload</button>
-                        </div>
-                    </form>
-
-                    <div id="profile-message" class="message-box hidden"></div>
-                </section>
-            </div>
-
-            <div class="right-column">
-                <section class="stats-card">
-                    <h2 class="section-title">Application stats</h2>
-
-                    <div id="stats-loading" class="loading-text">Loading your stats...</div>
-
-                    <div id="stats-grid" class="stats-grid hidden">
-                        <div class="stat-box">
-                            <span class="stat-label">Total</span>
-                            <div class="stat-number" id="stat-total">0</div>
-                        </div>
-
-                        <div class="stat-box">
-                            <span class="stat-label">Applied</span>
-                            <div class="stat-number" id="stat-applied">0</div>
-                        </div>
-
-                        <div class="stat-box">
-                            <span class="stat-label">Interview</span>
-                            <div class="stat-number" id="stat-interview">0</div>
-                        </div>
-
-                        <div class="stat-box">
-                            <span class="stat-label">Offer</span>
-                            <div class="stat-number" id="stat-offer">0</div>
-                        </div>
-
-                        <div class="stat-box">
-                            <span class="stat-label">Rejected</span>
-                            <div class="stat-number" id="stat-rejected">0</div>
-                        </div>
-
-                        <div class="stat-box">
-                            <span class="stat-label">Closed</span>
-                            <div class="stat-number" id="stat-closed">0</div>
-                        </div>
-                    </div>
-                </section>
-            </div>
+  <div class="page">
+    <section class="top-shell">
+      <div class="top-shell-row">
+        <div class="brand-block">
+          <div class="logo-box">
+            <div class="logo-circle">J</div>
+          </div>
+          <div class="brand-copy">
+            <h1>Job Tracker</h1>
+          </div>
         </div>
+
+        <div class="top-nav">
+          <a href="/dashboard/" class="nav-button">Applications</a>
+          <a href="/dashboard/#filters" class="nav-button">Filters</a>
+          <a href="/dashboard/#favorites" class="nav-button">Favorites</a>
+          <a href="/profile/" class="nav-button active">Profile</a>
+        </div>
+
+        <div class="auth-block">
+          <button id="open-login-dialog-button" class="secondary-button" type="button">Login</button>
+          <button id="open-register-dialog-button" class="secondary-button" type="button">Register</button>
+          <div id="auth-user-box" class="user-pill hidden"></div>
+          <button id="logout-button" class="secondary-button hidden" type="button">Logout</button>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="section-title">Profile</h2>
+
+      <div class="profile-message-space">
+        <div id="profile-message" class="message-box hidden"></div>
+      </div>
+
+      <div class="profile-shell">
+        <div class="profile-top">
+          <div class="profile-head">
+            <div id="avatar-letter" class="avatar-box">U</div>
+            <div>
+              <h3 id="profile-name" class="profile-name">User</h3>
+              <p id="profile-email-top" class="profile-email-top">No email</p>
+            </div>
+          </div>
+
+          <button id="open-edit-profile-dialog-button" class="profile-settings-button" type="button" aria-label="Edit profile">⚙</button>
+        </div>
+
+        <div class="profile-content-grid">
+          <div>
+            <h3 class="column-title">Account information</h3>
+
+            <div class="info-stack">
+              <div class="info-box">
+                <span class="info-label">Username</span>
+                <div id="profile-username" class="info-value">-</div>
+              </div>
+
+              <div class="info-box">
+                <span class="info-label">Email</span>
+                <div id="profile-email" class="info-value">-</div>
+              </div>
+
+              <div class="info-box">
+                <span class="info-label">Account status</span>
+                <div class="info-value">Authenticated user</div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h3 class="column-title">Application stats</h3>
+
+            <div class="stats-panel">
+              <div class="stats-grid">
+                <div class="stat-box">
+                  <span class="stat-label">Total</span>
+                  <div id="stats-total" class="stat-value">0</div>
+                </div>
+
+                <div class="stat-box">
+                  <span class="stat-label">Applied</span>
+                  <div id="stats-applied" class="stat-value">0</div>
+                </div>
+
+                <div class="stat-box">
+                  <span class="stat-label">Interview</span>
+                  <div id="stats-interview" class="stat-value">0</div>
+                </div>
+
+                <div class="stat-box">
+                  <span class="stat-label">Offer</span>
+                  <div id="stats-offer" class="stat-value">0</div>
+                </div>
+
+                <div class="stat-box">
+                  <span class="stat-label">Rejected</span>
+                  <div id="stats-rejected" class="stat-value">0</div>
+                </div>
+
+                <div class="stat-box">
+                  <span class="stat-label">Closed</span>
+                  <div id="stats-closed" class="stat-value">0</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="resumes-shell">
+        <div class="resumes-top">
+          <h3 class="section-title">Resumes</h3>
+          <p class="resumes-subtitle">Save resume files and add notes for each version.</p>
+        </div>
+
+        <form id="resume-form">
+          <div class="resume-grid">
+            <div class="resume-group">
+              <label class="resume-label" for="resume-title">Resume title</label>
+              <input id="resume-title" class="resume-input" type="text" placeholder="Frontend CV" />
+            </div>
+
+            <div class="resume-group">
+              <label class="resume-label" for="resume-file">Resume file</label>
+              <input id="resume-file" class="resume-input" type="file" />
+            </div>
+
+            <div class="resume-group" style="grid-column: 1 / -1;">
+              <label class="resume-label" for="resume-notes">Notes</label>
+              <textarea id="resume-notes" class="resume-textarea" placeholder="Version notes, target role, language, company-specific edits..."></textarea>
+            </div>
+          </div>
+
+          <div class="resume-actions">
+            <button class="upload-button" type="submit">Save resume draft</button>
+          </div>
+        </form>
+
+        <div id="resume-message" class="form-message hidden"></div>
+      </div>
+    </section>
+  </div>
+
+  <dialog id="edit-profile-dialog" class="modal-dialog">
+    <div class="dialog-card">
+      <div class="dialog-top">
+        <div>
+          <h2 class="modal-title">Edit profile</h2>
+          <p class="panel-subtitle">Update your username and email.</p>
+        </div>
+        <button id="close-edit-profile-dialog-button" class="modal-close-button" type="button">Close</button>
+      </div>
+
+      <form id="edit-profile-form" class="form-grid">
+        <div class="form-group">
+          <label class="form-label" for="edit-profile-username">Username</label>
+          <input id="edit-profile-username" class="form-input" type="text" required />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="edit-profile-email">Email</label>
+          <input id="edit-profile-email" class="form-input" type="email" />
+        </div>
+
+        <div class="actions-row" style="margin-top: 6px;">
+          <button class="submit-button" type="submit">Save changes</button>
+        </div>
+      </form>
+
+      <div id="edit-profile-message" class="form-message hidden"></div>
     </div>
+  </dialog>
 
-    <script>
-        const profileAvatar = document.getElementById('profile-avatar');
-        const profileUsername = document.getElementById('profile-username');
-        const profileEmail = document.getElementById('profile-email');
-        const infoUsername = document.getElementById('info-username');
-        const infoEmail = document.getElementById('info-email');
+  <dialog id="login-dialog" class="modal-dialog">
+    <div class="dialog-card">
+      <div class="dialog-top">
+        <div>
+          <h2 class="modal-title">Login</h2>
+          <p class="panel-subtitle">Sign in to your account.</p>
+        </div>
+        <button id="close-login-dialog-button" class="modal-close-button" type="button">Close</button>
+      </div>
 
-        const editUsername = document.getElementById('edit-username');
-        const editEmail = document.getElementById('edit-email');
-        const profileForm = document.getElementById('profile-form');
-        const profileMessage = document.getElementById('profile-message');
-        const reloadProfileButton = document.getElementById('reload-profile-button');
+      <form id="login-form" class="form-grid">
+        <div class="form-group">
+          <label class="form-label" for="login-username">Username</label>
+          <input id="login-username" class="form-input" type="text" required />
+        </div>
 
-        const statsLoading = document.getElementById('stats-loading');
-        const statsGrid = document.getElementById('stats-grid');
+        <div class="form-group">
+          <label class="form-label" for="login-password">Password</label>
+          <input id="login-password" class="form-input" type="password" required />
+        </div>
 
-        const statTotal = document.getElementById('stat-total');
-        const statApplied = document.getElementById('stat-applied');
-        const statInterview = document.getElementById('stat-interview');
-        const statOffer = document.getElementById('stat-offer');
-        const statRejected = document.getElementById('stat-rejected');
-        const statClosed = document.getElementById('stat-closed');
+        <div class="actions-row" style="margin-top: 6px;">
+          <button class="submit-button" type="submit">Login</button>
+        </div>
+      </form>
 
-        function escapeHtml(value) {
-            if (value === null || value === undefined) {
-                return '';
-            }
+      <div id="login-form-message" class="form-message hidden"></div>
+    </div>
+  </dialog>
 
-            return String(value)
-                .replaceAll('&', '&amp;')
-                .replaceAll('<', '&lt;')
-                .replaceAll('>', '&gt;')
-                .replaceAll('"', '&quot;')
-                .replaceAll("'", '&#39;');
+  <dialog id="register-dialog" class="modal-dialog">
+    <div class="dialog-card">
+      <div class="dialog-top">
+        <div>
+          <h2 class="modal-title">Register</h2>
+          <p class="panel-subtitle">Create a new account.</p>
+        </div>
+        <button id="close-register-dialog-button" class="modal-close-button" type="button">Close</button>
+      </div>
+
+      <form id="register-form" class="form-grid">
+        <div class="form-group">
+          <label class="form-label" for="register-username">Username</label>
+          <input id="register-username" class="form-input" type="text" required />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="register-email">Email</label>
+          <input id="register-email" class="form-input" type="email" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="register-password">Password</label>
+          <input id="register-password" class="form-input" type="password" required />
+        </div>
+
+        <div class="actions-row" style="margin-top: 6px;">
+          <button class="submit-button" type="submit">Register</button>
+        </div>
+      </form>
+
+      <div id="register-form-message" class="form-message hidden"></div>
+    </div>
+  </dialog>
+
+  <script>
+    const authUserBox = document.getElementById('auth-user-box');
+    const logoutButton = document.getElementById('logout-button');
+    const openLoginDialogButton = document.getElementById('open-login-dialog-button');
+    const openRegisterDialogButton = document.getElementById('open-register-dialog-button');
+
+    const profileMessage = document.getElementById('profile-message');
+    const resumeMessage = document.getElementById('resume-message');
+
+    const profileName = document.getElementById('profile-name');
+    const profileEmailTop = document.getElementById('profile-email-top');
+    const profileUsername = document.getElementById('profile-username');
+    const profileEmail = document.getElementById('profile-email');
+    const avatarLetter = document.getElementById('avatar-letter');
+
+    const statsTotal = document.getElementById('stats-total');
+    const statsApplied = document.getElementById('stats-applied');
+    const statsInterview = document.getElementById('stats-interview');
+    const statsOffer = document.getElementById('stats-offer');
+    const statsRejected = document.getElementById('stats-rejected');
+    const statsClosed = document.getElementById('stats-closed');
+
+    const editProfileDialog = document.getElementById('edit-profile-dialog');
+    const openEditProfileDialogButton = document.getElementById('open-edit-profile-dialog-button');
+    const closeEditProfileDialogButton = document.getElementById('close-edit-profile-dialog-button');
+    const editProfileForm = document.getElementById('edit-profile-form');
+    const editProfileMessage = document.getElementById('edit-profile-message');
+
+    const loginDialog = document.getElementById('login-dialog');
+    const registerDialog = document.getElementById('register-dialog');
+    const openLoginButton = document.getElementById('open-login-dialog-button');
+    const openRegisterButton = document.getElementById('open-register-dialog-button');
+    const closeLoginDialogButton = document.getElementById('close-login-dialog-button');
+    const closeRegisterDialogButton = document.getElementById('close-register-dialog-button');
+    const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
+    const loginFormMessage = document.getElementById('login-form-message');
+    const registerFormMessage = document.getElementById('register-form-message');
+
+    const resumeForm = document.getElementById('resume-form');
+
+    function escapeHtml(value) {
+      if (value === null || value === undefined) return '';
+      return String(value)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    function showMessage(element, message) {
+      element.classList.remove('hidden');
+      element.innerHTML = `<p>${escapeHtml(message)}</p>`;
+    }
+
+    function hideMessage(element) {
+      element.classList.add('hidden');
+      element.innerHTML = '';
+    }
+
+    function openDialog(dialog) {
+      if (!dialog.open) dialog.showModal();
+    }
+
+    function closeDialog(dialog) {
+      if (dialog.open) dialog.close();
+    }
+
+    async function requestJson(url, options = {}) {
+      const response = await fetch(url, {
+        credentials: 'same-origin',
+        ...options,
+      });
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error((data && data.error) || 'Request failed');
+      }
+
+      return data;
+    }
+
+    function applyProfileData(data) {
+      const user = data.user || {};
+      const stats = data.stats || {};
+
+      const username = user.username || 'User';
+      const email = user.email || 'No email';
+
+      profileName.textContent = username;
+      profileEmailTop.textContent = email;
+      profileUsername.textContent = username;
+      profileEmail.textContent = email;
+      avatarLetter.textContent = username.charAt(0).toUpperCase() || 'U';
+
+      statsTotal.textContent = stats.total ?? 0;
+      statsApplied.textContent = stats.applied ?? 0;
+      statsInterview.textContent = stats.interview ?? 0;
+      statsOffer.textContent = stats.offer ?? 0;
+      statsRejected.textContent = stats.rejected ?? 0;
+      statsClosed.textContent = stats.closed ?? 0;
+
+      document.getElementById('edit-profile-username').value = user.username || '';
+      document.getElementById('edit-profile-email').value = user.email || '';
+    }
+
+    async function checkAuth() {
+      try {
+        const data = await requestJson('/auth/me/');
+
+        if (data.authenticated && data.user) {
+          authUserBox.classList.remove('hidden');
+          authUserBox.textContent = data.user.username;
+          logoutButton.classList.remove('hidden');
+
+          openLoginDialogButton.style.display = 'none';
+          openRegisterDialogButton.style.display = 'none';
+        } else {
+          authUserBox.classList.add('hidden');
+          logoutButton.classList.add('hidden');
+
+          openLoginDialogButton.style.display = 'inline-flex';
+          openRegisterDialogButton.style.display = 'inline-flex';
         }
+      } catch (error) {
+        authUserBox.classList.add('hidden');
+        logoutButton.classList.add('hidden');
+        openLoginDialogButton.style.display = 'inline-flex';
+        openRegisterDialogButton.style.display = 'inline-flex';
+      }
+    }
 
-        function showMessage(message) {
-            profileMessage.classList.remove('hidden');
-            profileMessage.innerHTML = `<p>${escapeHtml(message)}</p>`;
-        }
+    async function loadProfile() {
+      hideMessage(profileMessage);
 
-        function hideMessage() {
-            profileMessage.classList.add('hidden');
-            profileMessage.innerHTML = '';
-        }
+      try {
+        const data = await requestJson('/profile-data/');
+        applyProfileData(data);
+      } catch (error) {
+        showMessage(profileMessage, error.message);
+      }
+    }
 
-        function setProfileData(data) {
-            const user = data.user || {};
-            const stats = data.stats || {};
+    editProfileForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      hideMessage(editProfileMessage);
 
-            const username = user.username || 'Unknown user';
-            const email = user.email || 'No email';
+      const payload = {
+        username: document.getElementById('edit-profile-username').value.trim(),
+        email: document.getElementById('edit-profile-email').value.trim(),
+      };
 
-            profileAvatar.textContent = username.charAt(0).toUpperCase() || 'U';
-            profileUsername.textContent = username;
-            profileEmail.textContent = email;
+      try {
+        const data = await requestJson('/profile-data/', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
 
-            infoUsername.textContent = username;
-            infoEmail.textContent = email;
+        applyProfileData(data);
+        closeDialog(editProfileDialog);
+      } catch (error) {
+        showMessage(editProfileMessage, error.message);
+      }
+    });
 
-            editUsername.value = username;
-            editEmail.value = user.email || '';
+    loginForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      hideMessage(loginFormMessage);
 
-            statTotal.textContent = stats.total ?? 0;
-            statApplied.textContent = stats.applied ?? 0;
-            statInterview.textContent = stats.interview ?? 0;
-            statOffer.textContent = stats.offer ?? 0;
-            statRejected.textContent = stats.rejected ?? 0;
-            statClosed.textContent = stats.closed ?? 0;
+      const payload = {
+        username: document.getElementById('login-username').value.trim(),
+        password: document.getElementById('login-password').value,
+      };
 
-            statsLoading.classList.add('hidden');
-            statsGrid.classList.remove('hidden');
-        }
+      try {
+        await requestJson('/auth/login/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
 
-        async function loadProfile() {
-            hideMessage();
-            statsLoading.classList.remove('hidden');
-            statsGrid.classList.add('hidden');
+        loginForm.reset();
+        closeDialog(loginDialog);
+        await checkAuth();
+        await loadProfile();
+      } catch (error) {
+        showMessage(loginFormMessage, error.message);
+      }
+    });
 
-            try {
-                const response = await fetch('/profile-data/', {
-                    credentials: 'same-origin'
-                });
+    registerForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      hideMessage(registerFormMessage);
 
-                const data = await response.json().catch(() => null);
+      const payload = {
+        username: document.getElementById('register-username').value.trim(),
+        email: document.getElementById('register-email').value.trim(),
+        password: document.getElementById('register-password').value,
+      };
 
-                if (response.status === 401) {
-                    showMessage('You need to login first.');
-                    profileUsername.textContent = 'Not logged in';
-                    profileEmail.textContent = 'Open login and sign in first.';
-                    infoUsername.textContent = 'Not available';
-                    infoEmail.textContent = 'Not available';
-                    statsLoading.textContent = 'Login required to view stats.';
-                    return;
-                }
+      try {
+        await requestJson('/auth/register/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
 
-                if (!response.ok) {
-                    throw new Error((data && data.error) || 'Failed to load profile');
-                }
+        registerForm.reset();
+        closeDialog(registerDialog);
+        await checkAuth();
+        await loadProfile();
+      } catch (error) {
+        showMessage(registerFormMessage, error.message);
+      }
+    });
 
-                setProfileData(data);
-            } catch (error) {
-                showMessage(error.message || 'Profile loading error.');
-                statsLoading.textContent = 'Could not load stats.';
-            }
-        }
+    logoutButton.addEventListener('click', async () => {
+      try {
+        await requestJson('/auth/logout/', { method: 'POST' });
+        await checkAuth();
+        showMessage(profileMessage, 'You have been logged out.');
 
-        async function updateProfile(event) {
-            event.preventDefault();
-            hideMessage();
+        profileName.textContent = 'User';
+        profileEmailTop.textContent = 'No email';
+        profileUsername.textContent = '-';
+        profileEmail.textContent = '-';
+        avatarLetter.textContent = 'U';
+        statsTotal.textContent = '0';
+        statsApplied.textContent = '0';
+        statsInterview.textContent = '0';
+        statsOffer.textContent = '0';
+        statsRejected.textContent = '0';
+        statsClosed.textContent = '0';
+      } catch (error) {
+        showMessage(profileMessage, error.message);
+      }
+    });
 
-            const payload = {
-                username: editUsername.value,
-                email: editEmail.value
-            };
+    resumeForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      showMessage(resumeMessage, 'Resume block is back in the layout. File upload backend can be connected next.');
+    });
 
-            try {
-                const response = await fetch('/profile-data/', {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    credentials: 'same-origin',
-                    body: JSON.stringify(payload)
-                });
+    openEditProfileDialogButton.addEventListener('click', () => {
+      hideMessage(editProfileMessage);
+      openDialog(editProfileDialog);
+    });
 
-                const data = await response.json().catch(() => null);
+    closeEditProfileDialogButton.addEventListener('click', () => closeDialog(editProfileDialog));
+    openLoginButton.addEventListener('click', () => openDialog(loginDialog));
+    openRegisterButton.addEventListener('click', () => openDialog(registerDialog));
+    closeLoginDialogButton.addEventListener('click', () => closeDialog(loginDialog));
+    closeRegisterDialogButton.addEventListener('click', () => closeDialog(registerDialog));
 
-                if (!response.ok) {
-                    throw new Error((data && data.error) || 'Failed to update profile');
-                }
-
-                setProfileData(data);
-                showMessage(data.message || 'Profile updated successfully.');
-            } catch (error) {
-                showMessage(error.message || 'Profile update error.');
-            }
-        }
-
-        profileForm.addEventListener('submit', updateProfile);
-        reloadProfileButton.addEventListener('click', loadProfile);
-
-        loadProfile();
-    </script>
+    checkAuth();
+    loadProfile();
+  </script>
 </body>
 </html>

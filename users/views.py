@@ -1,42 +1,30 @@
 import json
-
+from django.http import HttpResponse, JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
-from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_http_methods, require_POST
 
+from .models import UserProfile, JobApplication
 from .filters import filter_applications
-from .models import JobApplication, UserProfile
 
 
-def landing_page(request):
-    return render(request, 'landing.html')
-
-
-def login_page(request):
-    return render(request, 'login.html')
-
-
-def register_page(request):
-    return render(request, 'register.html')
-
-
-def dashboard_page(request):
-    return render(request, 'dashboard.html')
-
-
-def applications_page(request):
-    return render(request, 'applications.html')
-
-
-def filters_page(request):
-    return render(request, 'filters.html')
-
-
-def profile_page(request):
-    return render(request, 'profile.html')
+def serialize_application(application):
+    return {
+        'id': application.id,
+        'title': application.title,
+        'company': application.company,
+        'status': application.status,
+        'label_color': application.label_color,
+        'date_applied': application.date_applied,
+        'job_link': application.job_link,
+        'location': application.location,
+        'salary': application.salary,
+        'contact_name': application.contact_name,
+        'notes': application.notes,
+        'is_favorite': application.is_favorite,
+    }
 
 
 def job_tracker_page(request):
@@ -49,40 +37,37 @@ def register_view(request):
     try:
         data = json.loads(request.body)
     except json.JSONDecodeError:
-        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
 
-    username = (data.get('username') or '').strip()
-    email = (data.get('email') or '').strip()
-    password = data.get('password') or ''
+    username = (data.get("username") or "").strip()
+    email = (data.get("email") or "").strip()
+    password = data.get("password") or ""
 
     if not username:
-        return JsonResponse({'error': 'Username is required'}, status=400)
+        return JsonResponse({"error": "Username is required"}, status=400)
 
     if not password:
-        return JsonResponse({'error': 'Password is required'}, status=400)
+        return JsonResponse({"error": "Password is required"}, status=400)
 
     if User.objects.filter(username=username).exists():
-        return JsonResponse({'error': 'Username already exists'}, status=400)
+        return JsonResponse({"error": "Username already exists"}, status=400)
 
     user = User.objects.create_user(
         username=username,
         email=email,
-        password=password,
+        password=password
     )
 
     login(request, user)
 
-    return JsonResponse(
-        {
-            'message': 'Registration successful',
-            'user': {
-                'id': user.id,
-                'username': user.username,
-                'email': user.email,
-            },
-        },
-        status=201,
-    )
+    return JsonResponse({
+        "message": "Registration successful",
+        "user": {
+            "id": user.id,
+            "username": user.username,
+            "email": user.email,
+        }
+    }, status=201)
 
 
 @csrf_exempt
@@ -112,16 +97,14 @@ def login_view(request):
 
     login(request, user)
 
-    return JsonResponse(
-        {
-            'message': 'Login successful',
-            'user': {
-                'id': user.id,
-                'username': user.username,
-                'email': user.email,
-            },
+    return JsonResponse({
+        'message': 'Login successful',
+        'user': {
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
         }
-    )
+    })
 
 
 @csrf_exempt
@@ -131,23 +114,23 @@ def logout_view(request):
 
     logout(request)
 
-    return JsonResponse({'message': 'Logout successful'})
+    return JsonResponse({
+        'message': 'Logout successful'
+    })
 
 
 def me_view(request):
     if not request.user.is_authenticated:
         return JsonResponse({'authenticated': False}, status=200)
 
-    return JsonResponse(
-        {
-            'authenticated': True,
-            'user': {
-                'id': request.user.id,
-                'username': request.user.username,
-                'email': request.user.email,
-            },
+    return JsonResponse({
+        'authenticated': True,
+        'user': {
+            'id': request.user.id,
+            'username': request.user.username,
+            'email': request.user.email,
         }
-    )
+    })
 
 
 @csrf_exempt
@@ -165,23 +148,21 @@ def profile_view(request):
         rejected_count = applications.filter(status=JobApplication.Status.REJECTED).count()
         closed_count = applications.filter(status=JobApplication.Status.CLOSED).count()
 
-        return JsonResponse(
-            {
-                'user': {
-                    'id': user.id,
-                    'username': user.username,
-                    'email': user.email,
-                },
-                'stats': {
-                    'total': applications.count(),
-                    'applied': applied_count,
-                    'interview': interview_count,
-                    'offer': offer_count,
-                    'rejected': rejected_count,
-                    'closed': closed_count,
-                },
+        return JsonResponse({
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+            },
+            'stats': {
+                'total': applications.count(),
+                'applied': applied_count,
+                'interview': interview_count,
+                'offer': offer_count,
+                'rejected': rejected_count,
+                'closed': closed_count,
             }
-        )
+        })
 
     if request.method == 'PATCH':
         try:
@@ -215,122 +196,45 @@ def profile_view(request):
         rejected_count = applications.filter(status=JobApplication.Status.REJECTED).count()
         closed_count = applications.filter(status=JobApplication.Status.CLOSED).count()
 
-        return JsonResponse(
-            {
-                'message': 'Profile updated successfully',
-                'user': {
-                    'id': user.id,
-                    'username': user.username,
-                    'email': user.email,
-                },
-                'stats': {
-                    'total': applications.count(),
-                    'applied': applied_count,
-                    'interview': interview_count,
-                    'offer': offer_count,
-                    'rejected': rejected_count,
-                    'closed': closed_count,
-                },
+        return JsonResponse({
+            'message': 'Profile updated successfully',
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+            },
+            'stats': {
+                'total': applications.count(),
+                'applied': applied_count,
+                'interview': interview_count,
+                'offer': offer_count,
+                'rejected': rejected_count,
+                'closed': closed_count,
             }
-        )
+        })
 
     return JsonResponse({'error': 'Method not allowed'}, status=405)
 
 
 @csrf_exempt
-def application_home(request):
+def favorites_home(request):
     if not request.user.is_authenticated:
         return JsonResponse({'error': 'Authentication required'}, status=401)
 
     if request.method == 'GET':
-        applications = JobApplication.objects.filter(user=request.user).order_by('-id')
-
-        applications, error = filter_applications(applications, request.GET)
-
-        if error:
-            return JsonResponse({'error': error}, status=400)
-
-        data = []
-        for application in applications:
-            data.append(
-                {
-                    'id': application.id,
-                    'title': application.title,
-                    'company': application.company,
-                    'status': application.status,
-                    'label_color': application.label_color,
-                    'date_applied': application.date_applied.isoformat() if application.date_applied else '',
-                    'job_link': application.job_link,
-                    'location': application.location,
-                    'salary': application.salary,
-                    'contact_name': application.contact_name,
-                    'notes': application.notes,
-                    'is_favorite': application.is_favorite,
-                }
-            )
-
-        return JsonResponse({'applications': data})
-
-    if request.method == 'POST':
-        try:
-            body = json.loads(request.body)
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON'}, status=400)
-
-        title = body.get('title')
-        company = body.get('company')
-        status_value = body.get('status')
-        label_color_value = body.get('label_color', JobApplication.LabelColor.NONE)
-
-        if not title or not company or not status_value:
-            return JsonResponse({'error': 'title, company and status are required'}, status=400)
-
-        allowed_statuses = [choice[0] for choice in JobApplication.Status.choices]
-        if status_value not in allowed_statuses:
-            return JsonResponse({'error': 'Invalid status'}, status=400)
-
-        allowed_colors = [choice[0] for choice in JobApplication.LabelColor.choices]
-        if label_color_value not in allowed_colors:
-            return JsonResponse({'error': 'Invalid label color'}, status=400)
-
-        application = JobApplication.objects.create(
+        applications = JobApplication.objects.filter(
             user=request.user,
-            title=title,
-            company=company,
-            status=status_value,
-            label_color=label_color_value,
-            date_applied=body.get('date_applied') or None,
-            job_link=body.get('job_link', ''),
-            location=body.get('location', ''),
-            salary=body.get('salary', ''),
-            contact_name=body.get('contact_name', ''),
-            notes=body.get('notes', ''),
-            is_favorite=bool(body.get('is_favorite', False)),
+            is_favorite=True
         )
 
-        return JsonResponse(
-            {
-                'id': application.id,
-                'title': application.title,
-                'company': application.company,
-                'status': application.status,
-                'label_color': application.label_color,
-                'date_applied': application.date_applied.isoformat() if application.date_applied else '',
-                'job_link': application.job_link,
-                'location': application.location,
-                'salary': application.salary,
-                'contact_name': application.contact_name,
-                'notes': application.notes,
-                'is_favorite': application.is_favorite,
-            },
-            status=201,
-        )
+        data = [serialize_application(application) for application in applications]
+        return JsonResponse({'applications': data})
 
     return JsonResponse({'error': 'Method not allowed'}, status=405)
 
 
 @csrf_exempt
-def application_detail(request, id):
+def favorite_detail(request, id):
     if not request.user.is_authenticated:
         return JsonResponse({'error': 'Authentication required'}, status=401)
 
@@ -338,24 +242,6 @@ def application_detail(request, id):
         application = JobApplication.objects.get(id=id, user=request.user)
     except JobApplication.DoesNotExist:
         return JsonResponse({'error': 'Application not found'}, status=404)
-
-    if request.method == 'GET':
-        return JsonResponse(
-            {
-                'id': application.id,
-                'title': application.title,
-                'company': application.company,
-                'status': application.status,
-                'label_color': application.label_color,
-                'date_applied': application.date_applied.isoformat() if application.date_applied else '',
-                'job_link': application.job_link,
-                'location': application.location,
-                'salary': application.salary,
-                'contact_name': application.contact_name,
-                'notes': application.notes,
-                'is_favorite': application.is_favorite,
-            }
-        )
 
     if request.method == 'PATCH':
         try:
@@ -363,131 +249,15 @@ def application_detail(request, id):
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON'}, status=400)
 
-        if 'title' in body:
-            application.title = body['title']
+        if 'is_favorite' not in body:
+            return JsonResponse({'error': 'is_favorite is required'}, status=400)
 
-        if 'company' in body:
-            application.company = body['company']
-
-        if 'status' in body:
-            allowed_statuses = [choice[0] for choice in JobApplication.Status.choices]
-            if body['status'] not in allowed_statuses:
-                return JsonResponse({'error': 'Invalid status'}, status=400)
-            application.status = body['status']
-
-        if 'label_color' in body:
-            allowed_colors = [choice[0] for choice in JobApplication.LabelColor.choices]
-            if body['label_color'] not in allowed_colors:
-                return JsonResponse({'error': 'Invalid label color'}, status=400)
-            application.label_color = body['label_color']
-
-        if 'date_applied' in body:
-            application.date_applied = body['date_applied'] or None
-
-        if 'job_link' in body:
-            application.job_link = body['job_link']
-
-        if 'location' in body:
-            application.location = body['location']
-
-        if 'salary' in body:
-            application.salary = body['salary']
-
-        if 'contact_name' in body:
-            application.contact_name = body['contact_name']
-
-        if 'notes' in body:
-            application.notes = body['notes']
-
-        if 'is_favorite' in body:
-            application.is_favorite = bool(body['is_favorite'])
-
+        application.is_favorite = bool(body['is_favorite'])
         application.save()
 
-        return JsonResponse(
-            {
-                'id': application.id,
-                'title': application.title,
-                'company': application.company,
-                'status': application.status,
-                'label_color': application.label_color,
-                'date_applied': application.date_applied.isoformat() if application.date_applied else '',
-                'job_link': application.job_link,
-                'location': application.location,
-                'salary': application.salary,
-                'contact_name': application.contact_name,
-                'notes': application.notes,
-                'is_favorite': application.is_favorite,
-            }
-        )
-
-    if request.method == 'DELETE':
-        application.delete()
-        return HttpResponse(status=204)
+        return JsonResponse(serialize_application(application))
 
     return JsonResponse({'error': 'Method not allowed'}, status=405)
-
-
-@csrf_exempt
-@require_http_methods(['PATCH'])
-def favorite_toggle_view(request, id):
-    if not request.user.is_authenticated:
-        return JsonResponse({'error': 'Authentication required'}, status=401)
-
-    try:
-        application = JobApplication.objects.get(id=id, user=request.user)
-    except JobApplication.DoesNotExist:
-        return JsonResponse({'error': 'Application not found'}, status=404)
-
-    try:
-        body = json.loads(request.body)
-    except json.JSONDecodeError:
-        return JsonResponse({'error': 'Invalid JSON'}, status=400)
-
-    application.is_favorite = bool(body.get('is_favorite', False))
-    application.save()
-
-    return JsonResponse(
-        {
-            'id': application.id,
-            'is_favorite': application.is_favorite,
-        }
-    )
-
-
-@csrf_exempt
-def favorites_list_view(request):
-    if not request.user.is_authenticated:
-        return JsonResponse({'error': 'Authentication required'}, status=401)
-
-    if request.method != 'GET':
-        return JsonResponse({'error': 'Method not allowed'}, status=405)
-
-    applications = JobApplication.objects.filter(
-        user=request.user,
-        is_favorite=True,
-    ).order_by('-id')
-
-    data = []
-    for application in applications:
-        data.append(
-            {
-                'id': application.id,
-                'title': application.title,
-                'company': application.company,
-                'status': application.status,
-                'label_color': application.label_color,
-                'date_applied': application.date_applied.isoformat() if application.date_applied else '',
-                'job_link': application.job_link,
-                'location': application.location,
-                'salary': application.salary,
-                'contact_name': application.contact_name,
-                'notes': application.notes,
-                'is_favorite': application.is_favorite,
-            }
-        )
-
-    return JsonResponse({'applications': data})
 
 
 @csrf_exempt
@@ -497,13 +267,11 @@ def user_home(request):
 
         data = []
         for user in users:
-            data.append(
-                {
-                    'id': user.id,
-                    'name': user.name,
-                    'email': user.email,
-                }
-            )
+            data.append({
+                'id': user.id,
+                'name': user.name,
+                'email': user.email,
+            })
         return JsonResponse({'users': data})
 
     if request.method == 'POST':
@@ -542,19 +310,15 @@ def user_detail(request, id):
         return JsonResponse({'error': 'User not found'}, status=404)
 
     if request.method == 'GET':
-        return JsonResponse(
-            {
-                'id': user.id,
-                'name': user.name,
-                'email': user.email,
-            }
-        )
+        data = {
+            'id': user.id,
+            'name': user.name,
+            'email': user.email,
+        }
+        return JsonResponse(data)
 
     if request.method == 'PATCH':
-        try:
-            body = json.loads(request.body)
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        body = json.loads(request.body)
 
         if 'name' in body:
             user.name = body['name']
@@ -577,3 +341,158 @@ def user_detail(request, id):
         return JsonResponse({}, status=204)
 
     return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+
+@csrf_exempt
+def application_home(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Authentication required'}, status=401)
+
+    if request.method == 'GET':
+        applications = JobApplication.objects.filter(user=request.user)
+
+        applications, error = filter_applications(applications, request.GET)
+
+        if error:
+            return JsonResponse({'error': error}, status=400)
+
+        data = [serialize_application(application) for application in applications]
+        return JsonResponse({'applications': data})
+
+    if request.method == 'POST':
+        try:
+            body = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+        title = body.get('title')
+        company = body.get('company')
+        status_value = body.get('status')
+        label_color_value = body.get('label_color', JobApplication.LabelColor.NONE)
+
+        if not title or not company or not status_value:
+            return JsonResponse({'error': 'title, company and status are required'}, status=400)
+
+        allowed_statuses = [choice[0] for choice in JobApplication.Status.choices]
+        if status_value not in allowed_statuses:
+            return JsonResponse({'error': 'Invalid status'}, status=400)
+
+        allowed_colors = [choice[0] for choice in JobApplication.LabelColor.choices]
+        if label_color_value not in allowed_colors:
+            return JsonResponse({'error': 'Invalid label color'}, status=400)
+
+        application = JobApplication.objects.create(
+            user=request.user,
+            title=title,
+            company=company,
+            status=status_value,
+            label_color=label_color_value,
+            date_applied=body.get('date_applied') or None,
+            job_link=body.get('job_link', ''),
+            location=body.get('location', ''),
+            salary=body.get('salary', ''),
+            contact_name=body.get('contact_name', ''),
+            notes=body.get('notes', ''),
+        )
+
+        return JsonResponse(serialize_application(application), status=201)
+
+    return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+
+@csrf_exempt
+def application_detail(request, id):
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Authentication required'}, status=401)
+
+    try:
+        application = JobApplication.objects.get(id=id, user=request.user)
+    except JobApplication.DoesNotExist:
+        return JsonResponse({'error': 'Application not found'}, status=404)
+
+    if request.method == 'GET':
+        return JsonResponse(serialize_application(application))
+
+    if request.method == 'PATCH':
+        try:
+            body = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+        if 'title' in body:
+            application.title = body['title']
+
+        if 'company' in body:
+            application.company = body['company']
+
+        if 'status' in body:
+            allowed_statuses = [choice[0] for choice in JobApplication.Status.choices]
+
+            if body['status'] not in allowed_statuses:
+                return JsonResponse({'error': 'Invalid status'}, status=400)
+
+            application.status = body['status']
+
+        if 'label_color' in body:
+            allowed_colors = [choice[0] for choice in JobApplication.LabelColor.choices]
+
+            if body['label_color'] not in allowed_colors:
+                return JsonResponse({'error': 'Invalid label color'}, status=400)
+
+            application.label_color = body['label_color']
+
+        if 'date_applied' in body:
+            application.date_applied = body['date_applied'] or None
+
+        if 'job_link' in body:
+            application.job_link = body['job_link']
+
+        if 'location' in body:
+            application.location = body['location']
+
+        if 'salary' in body:
+            application.salary = body['salary']
+
+        if 'contact_name' in body:
+            application.contact_name = body['contact_name']
+
+        if 'notes' in body:
+            application.notes = body['notes']
+
+        application.save()
+
+        return JsonResponse(serialize_application(application))
+
+    if request.method == 'DELETE':
+        application.delete()
+        return HttpResponse(status=204)
+
+    return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+
+def landing_page(request):
+    return render(request, 'landing.html')
+
+
+def login_page(request):
+    return render(request, 'login.html')
+
+
+def register_page(request):
+    return render(request, 'register.html')
+
+
+def dashboard_page(request):
+    return render(request, 'dashboard.html')
+
+
+def applications_page(request):
+    return render(request, 'applications.html')
+
+
+def filters_page(request):
+    return render(request, 'filters.html')
+
+
+def profile_page(request):
+    return render(request, 'profile.html')
