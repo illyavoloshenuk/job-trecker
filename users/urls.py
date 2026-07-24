@@ -23,6 +23,7 @@ urlpatterns = [
     path('auth/password-reset/confirm/', views.confirm_password_reset_view, name='confirm_password_reset'),
 
     path('profile-data/', views.profile_view, name='profile_view'),
+    path('support-request/', views.support_request_view, name='support_request'),
 
     path('resumes/', views.resume_home, name='resume_home'),
     path('resumes/<int:id>/', views.resume_detail, name='resume_detail'),

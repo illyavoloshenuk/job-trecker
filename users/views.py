@@ -439,6 +439,51 @@ def profile_view(request):
 
     return JsonResponse({'error': 'Method not allowed'}, status=405)
 
+@csrf_exempt
+def support_request_view(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Authentication required'}, status=401)
+
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+    try:
+        body = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    full_name = (body.get('full_name') or '').strip()
+    problem = (body.get('problem') or '').strip()
+
+    if not full_name:
+        return JsonResponse({'error': 'Full name is required'}, status=400)
+
+    if not problem:
+        return JsonResponse({'error': 'Problem description is required'}, status=400)
+
+    user = request.user
+
+    try:
+        send_mail(
+            subject='New support request from Job Tracker',
+            message=(
+                f'New support request from Job Tracker.\n\n'
+                f'Full name: {full_name}\n'
+                f'Username: {user.username}\n'
+                f'Email: {user.email or "No email"}\n\n'
+                f'Problem description:\n'
+                f'{problem}\n'
+            ),
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=['jobtracker.smsg@gmail.com'],
+            fail_silently=False,
+        )
+    except Exception as error:
+        return JsonResponse({'error': str(error)}, status=500)
+
+    return JsonResponse({
+        'message': 'Support request sent successfully'
+    })
 
 @csrf_exempt
 def resume_home(request):
@@ -612,6 +657,8 @@ def application_home(request):
         return JsonResponse(serialize_application(application), status=201)
 
     return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+
 
 
 @csrf_exempt
