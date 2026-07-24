@@ -1,13 +1,25 @@
 import json
+import random
+
+from django.conf import settings
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
+from django.contrib.auth.models import User
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
+from django.core.mail import send_mail
 from django.http import HttpResponse, JsonResponse
+from django.shortcuts import render
+from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.models import User
-from django.shortcuts import render
 
-from .models import UserProfile, JobApplication
 from .filters import filter_applications
+from .models import JobApplication, PasswordResetCode, Resume, UserProfile
+
+
+def get_or_create_profile(user):
+    profile, created = UserProfile.objects.get_or_create(user=user)
+    return profile
 
 
 def serialize_application(application):
@@ -17,7 +29,7 @@ def serialize_application(application):
         'company': application.company,
         'status': application.status,
         'label_color': application.label_color,
-        'date_applied': application.date_applied,
+        'date_applied': application.date_applied.isoformat() if application.date_applied else None,
         'job_link': application.job_link,
         'location': application.location,
         'salary': application.salary,
@@ -25,6 +37,78 @@ def serialize_application(application):
         'notes': application.notes,
         'is_favorite': application.is_favorite,
     }
+
+
+def serialize_resume(resume):
+    return {
+        'id': resume.id,
+        'title': resume.title,
+        'notes': resume.notes,
+        'file_name': resume.file.name.split('/')[-1] if resume.file else '',
+        'file_url': resume.file.url if resume.file else '',
+        'created_at': resume.created_at.strftime('%Y-%m-%d %H:%M'),
+        'updated_at': resume.updated_at.strftime('%Y-%m-%d %H:%M'),
+    }
+
+
+def build_profile_payload(user):
+    profile = get_or_create_profile(user)
+    applications = JobApplication.objects.filter(user=user)
+    resumes = Resume.objects.filter(user=user)
+
+    applied_count = applications.filter(status=JobApplication.Status.APPLIED).count()
+    interview_count = applications.filter(status=JobApplication.Status.INTERVIEW).count()
+    offer_count = applications.filter(status=JobApplication.Status.OFFER).count()
+    rejected_count = applications.filter(status=JobApplication.Status.REJECTED).count()
+    closed_count = applications.filter(status=JobApplication.Status.CLOSED).count()
+
+    return {
+        'user': {
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+        },
+        'profile': {
+            'avatar_url': profile.avatar.url if profile.avatar else '',
+        },
+        'stats': {
+            'total': applications.count(),
+            'applied': applied_count,
+            'interview': interview_count,
+            'offer': offer_count,
+            'rejected': rejected_count,
+            'closed': closed_count,
+        },
+        'resumes': [serialize_resume(resume) for resume in resumes],
+    }
+
+
+def landing_page(request):
+    return render(request, 'landing.html')
+
+
+def login_page(request):
+    return render(request, 'login.html')
+
+
+def register_page(request):
+    return render(request, 'register.html')
+
+
+def dashboard_page(request):
+    return render(request, 'dashboard.html')
+
+
+def applications_page(request):
+    return render(request, 'applications.html')
+
+
+def filters_page(request):
+    return render(request, 'filters.html')
+
+
+def profile_page(request):
+    return render(request, 'profile.html')
 
 
 def job_tracker_page(request):
@@ -52,12 +136,21 @@ def register_view(request):
     if User.objects.filter(username=username).exists():
         return JsonResponse({"error": "Username already exists"}, status=400)
 
+    if email and User.objects.filter(email__iexact=email).exists():
+        return JsonResponse({"error": "Email already exists"}, status=400)
+
+    try:
+        validate_password(password)
+    except ValidationError as error:
+        return JsonResponse({"error": " ".join(error.messages)}, status=400)
+
     user = User.objects.create_user(
         username=username,
         email=email,
         password=password
     )
 
+    get_or_create_profile(user)
     login(request, user)
 
     return JsonResponse({
@@ -80,21 +173,18 @@ def login_view(request):
     except json.JSONDecodeError:
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
 
-    username = body.get('username', '').strip()
-    password = body.get('password', '').strip()
+    username = (body.get('username') or '').strip()
+    password = body.get('password') or ''
 
     if not username or not password:
-        return JsonResponse({'error': 'username and password are required'}, status=400)
+        return JsonResponse({'error': 'Username and password are required'}, status=400)
 
-    user = authenticate(
-        request,
-        username=username,
-        password=password,
-    )
+    user = authenticate(request, username=username, password=password)
 
     if user is None:
         return JsonResponse({'error': 'Invalid username or password'}, status=401)
 
+    get_or_create_profile(user)
     login(request, user)
 
     return JsonResponse({
@@ -134,35 +224,143 @@ def me_view(request):
 
 
 @csrf_exempt
+def request_password_reset_code_view(request):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+    try:
+        body = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    email = (body.get('email') or '').strip().lower()
+
+    if not email:
+        return JsonResponse({'error': 'Email is required'}, status=400)
+
+    user = User.objects.filter(email__iexact=email).first()
+
+    if not user:
+        return JsonResponse({'error': 'User with this email was not found'}, status=404)
+
+    PasswordResetCode.objects.filter(user=user).delete()
+
+    code = str(random.randint(100000, 999999))
+
+    reset_code = PasswordResetCode.objects.create(
+        user=user,
+        email=user.email,
+        code=code,
+        expires_at=timezone.now() + timezone.timedelta(minutes=10),
+    )
+
+    try:
+        send_mail(
+            subject='Your Job Tracker password reset code',
+            message=f'Your verification code is: {reset_code.code}',
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[user.email],
+            fail_silently=False,
+        )
+    except Exception:
+        return JsonResponse({'error': 'Failed to send email. Check email settings.'}, status=500)
+
+    return JsonResponse({
+        'message': 'Verification code sent successfully'
+    })
+
+
+@csrf_exempt
+def verify_password_reset_code_view(request):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+    try:
+        body = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    email = (body.get('email') or '').strip().lower()
+    code = (body.get('code') or '').strip()
+
+    if not email or not code:
+        return JsonResponse({'error': 'Email and code are required'}, status=400)
+
+    reset_code = PasswordResetCode.objects.filter(
+        email__iexact=email,
+        code=code
+    ).order_by('-created_at').first()
+
+    if not reset_code:
+        return JsonResponse({'error': 'Invalid verification code'}, status=400)
+
+    if reset_code.is_expired():
+        return JsonResponse({'error': 'Verification code has expired'}, status=400)
+
+    reset_code.is_verified = True
+    reset_code.save()
+
+    return JsonResponse({
+        'message': 'Code verified successfully'
+    })
+
+
+@csrf_exempt
+def confirm_password_reset_view(request):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+    try:
+        body = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    email = (body.get('email') or '').strip().lower()
+    code = (body.get('code') or '').strip()
+    new_password = body.get('new_password') or ''
+
+    if not email or not code or not new_password:
+        return JsonResponse({'error': 'Email, code and new_password are required'}, status=400)
+
+    reset_code = PasswordResetCode.objects.filter(
+        email__iexact=email,
+        code=code,
+        is_verified=True
+    ).order_by('-created_at').first()
+
+    if not reset_code:
+        return JsonResponse({'error': 'Verified code was not found'}, status=400)
+
+    if reset_code.is_expired():
+        return JsonResponse({'error': 'Verification code has expired'}, status=400)
+
+    user = reset_code.user
+
+    try:
+        validate_password(new_password, user=user)
+    except ValidationError as error:
+        return JsonResponse({'error': ' '.join(error.messages)}, status=400)
+
+    user.set_password(new_password)
+    user.save()
+
+    PasswordResetCode.objects.filter(user=user).delete()
+
+    return JsonResponse({
+        'message': 'Password updated successfully'
+    })
+
+
+@csrf_exempt
 def profile_view(request):
     if not request.user.is_authenticated:
         return JsonResponse({'error': 'Authentication required'}, status=401)
 
     user = request.user
-    applications = JobApplication.objects.filter(user=user)
+    profile = get_or_create_profile(user)
 
     if request.method == 'GET':
-        applied_count = applications.filter(status=JobApplication.Status.APPLIED).count()
-        interview_count = applications.filter(status=JobApplication.Status.INTERVIEW).count()
-        offer_count = applications.filter(status=JobApplication.Status.OFFER).count()
-        rejected_count = applications.filter(status=JobApplication.Status.REJECTED).count()
-        closed_count = applications.filter(status=JobApplication.Status.CLOSED).count()
-
-        return JsonResponse({
-            'user': {
-                'id': user.id,
-                'username': user.username,
-                'email': user.email,
-            },
-            'stats': {
-                'total': applications.count(),
-                'applied': applied_count,
-                'interview': interview_count,
-                'offer': offer_count,
-                'rejected': rejected_count,
-                'closed': closed_count,
-            }
-        })
+        return JsonResponse(build_profile_payload(user))
 
     if request.method == 'PATCH':
         try:
@@ -175,7 +373,6 @@ def profile_view(request):
 
         if username is not None:
             username = username.strip()
-
             if not username:
                 return JsonResponse({'error': 'Username cannot be empty'}, status=400)
 
@@ -186,32 +383,111 @@ def profile_view(request):
             user.username = username
 
         if email is not None:
-            user.email = email.strip()
+            email = email.strip()
+            existing_email_user = User.objects.filter(email__iexact=email).exclude(id=user.id).first()
+            if email and existing_email_user:
+                return JsonResponse({'error': 'Email already exists'}, status=400)
+            user.email = email
 
         user.save()
 
-        applied_count = applications.filter(status=JobApplication.Status.APPLIED).count()
-        interview_count = applications.filter(status=JobApplication.Status.INTERVIEW).count()
-        offer_count = applications.filter(status=JobApplication.Status.OFFER).count()
-        rejected_count = applications.filter(status=JobApplication.Status.REJECTED).count()
-        closed_count = applications.filter(status=JobApplication.Status.CLOSED).count()
+        payload = build_profile_payload(user)
+        payload['message'] = 'Profile updated successfully'
+        return JsonResponse(payload)
 
-        return JsonResponse({
-            'message': 'Profile updated successfully',
-            'user': {
-                'id': user.id,
-                'username': user.username,
-                'email': user.email,
-            },
-            'stats': {
-                'total': applications.count(),
-                'applied': applied_count,
-                'interview': interview_count,
-                'offer': offer_count,
-                'rejected': rejected_count,
-                'closed': closed_count,
-            }
-        })
+    if request.method == 'POST':
+        avatar = request.FILES.get('avatar')
+        current_password = request.POST.get('current_password', '')
+        new_password = request.POST.get('new_password', '')
+
+        if avatar:
+            profile.avatar = avatar
+            profile.save()
+
+        if new_password:
+            if not current_password:
+                return JsonResponse({'error': 'Current password is required'}, status=400)
+
+            if not user.check_password(current_password):
+                return JsonResponse({'error': 'Current password is incorrect'}, status=400)
+
+            try:
+                validate_password(new_password, user=user)
+            except ValidationError as error:
+                return JsonResponse({'error': ' '.join(error.messages)}, status=400)
+
+            user.set_password(new_password)
+            user.save()
+            update_session_auth_hash(request, user)
+
+        payload = build_profile_payload(user)
+        payload['message'] = 'Settings updated successfully'
+        return JsonResponse(payload)
+
+    return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+
+@csrf_exempt
+def resume_home(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Authentication required'}, status=401)
+
+    if request.method == 'GET':
+        resumes = Resume.objects.filter(user=request.user)
+        return JsonResponse({'resumes': [serialize_resume(resume) for resume in resumes]})
+
+    if request.method == 'POST':
+        title = (request.POST.get('title') or '').strip()
+        notes = (request.POST.get('notes') or '').strip()
+        resume_file = request.FILES.get('file')
+
+        if not title:
+            return JsonResponse({'error': 'Resume title is required'}, status=400)
+
+        resume = Resume.objects.create(
+            user=request.user,
+            title=title,
+            notes=notes,
+            file=resume_file,
+        )
+
+        return JsonResponse(serialize_resume(resume), status=201)
+
+    return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+
+@csrf_exempt
+def resume_detail(request, id):
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Authentication required'}, status=401)
+
+    try:
+        resume = Resume.objects.get(id=id, user=request.user)
+    except Resume.DoesNotExist:
+        return JsonResponse({'error': 'Resume not found'}, status=404)
+
+    if request.method == 'GET':
+        return JsonResponse(serialize_resume(resume))
+
+    if request.method == 'PATCH':
+        title = (request.POST.get('title') or '').strip()
+        notes = (request.POST.get('notes') or '').strip()
+        resume_file = request.FILES.get('file')
+
+        if title:
+            resume.title = title
+
+        resume.notes = notes
+
+        if resume_file:
+            resume.file = resume_file
+
+        resume.save()
+        return JsonResponse(serialize_resume(resume))
+
+    if request.method == 'DELETE':
+        resume.delete()
+        return HttpResponse(status=204)
 
     return JsonResponse({'error': 'Method not allowed'}, status=405)
 
@@ -226,7 +502,6 @@ def favorites_home(request):
             user=request.user,
             is_favorite=True
         )
-
         data = [serialize_application(application) for application in applications]
         return JsonResponse({'applications': data})
 
@@ -256,89 +531,6 @@ def favorite_detail(request, id):
         application.save()
 
         return JsonResponse(serialize_application(application))
-
-    return JsonResponse({'error': 'Method not allowed'}, status=405)
-
-
-@csrf_exempt
-def user_home(request):
-    if request.method == 'GET':
-        users = UserProfile.objects.all()
-
-        data = []
-        for user in users:
-            data.append({
-                'id': user.id,
-                'name': user.name,
-                'email': user.email,
-            })
-        return JsonResponse({'users': data})
-
-    if request.method == 'POST':
-        try:
-            body = json.loads(request.body)
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON'}, status=400)
-
-        name = body.get('name')
-        email = body.get('email')
-
-        if not name or not email:
-            return JsonResponse({'error': 'name and email are required'}, status=400)
-
-        user = UserProfile.objects.create(
-            name=name,
-            email=email,
-        )
-        return JsonResponse(
-            {
-                'id': user.id,
-                'name': user.name,
-                'email': user.email,
-            },
-            status=201,
-        )
-
-    return JsonResponse({'error': 'Method not allowed'}, status=405)
-
-
-@csrf_exempt
-def user_detail(request, id):
-    try:
-        user = UserProfile.objects.get(id=id)
-    except UserProfile.DoesNotExist:
-        return JsonResponse({'error': 'User not found'}, status=404)
-
-    if request.method == 'GET':
-        data = {
-            'id': user.id,
-            'name': user.name,
-            'email': user.email,
-        }
-        return JsonResponse(data)
-
-    if request.method == 'PATCH':
-        body = json.loads(request.body)
-
-        if 'name' in body:
-            user.name = body['name']
-
-        if 'email' in body:
-            user.email = body['email']
-
-        user.save()
-
-        return JsonResponse(
-            {
-                'id': user.id,
-                'name': user.name,
-                'email': user.email,
-            }
-        )
-
-    if request.method == 'DELETE':
-        user.delete()
-        return JsonResponse({}, status=204)
 
     return JsonResponse({'error': 'Method not allowed'}, status=405)
 
@@ -427,18 +619,14 @@ def application_detail(request, id):
 
         if 'status' in body:
             allowed_statuses = [choice[0] for choice in JobApplication.Status.choices]
-
             if body['status'] not in allowed_statuses:
                 return JsonResponse({'error': 'Invalid status'}, status=400)
-
             application.status = body['status']
 
         if 'label_color' in body:
             allowed_colors = [choice[0] for choice in JobApplication.LabelColor.choices]
-
             if body['label_color'] not in allowed_colors:
                 return JsonResponse({'error': 'Invalid label color'}, status=400)
-
             application.label_color = body['label_color']
 
         if 'date_applied' in body:
@@ -459,6 +647,9 @@ def application_detail(request, id):
         if 'notes' in body:
             application.notes = body['notes']
 
+        if 'is_favorite' in body:
+            application.is_favorite = bool(body['is_favorite'])
+
         application.save()
 
         return JsonResponse(serialize_application(application))
@@ -468,31 +659,3 @@ def application_detail(request, id):
         return HttpResponse(status=204)
 
     return JsonResponse({'error': 'Method not allowed'}, status=405)
-
-
-def landing_page(request):
-    return render(request, 'landing.html')
-
-
-def login_page(request):
-    return render(request, 'login.html')
-
-
-def register_page(request):
-    return render(request, 'register.html')
-
-
-def dashboard_page(request):
-    return render(request, 'dashboard.html')
-
-
-def applications_page(request):
-    return render(request, 'applications.html')
-
-
-def filters_page(request):
-    return render(request, 'filters.html')
-
-
-def profile_page(request):
-    return render(request, 'profile.html')

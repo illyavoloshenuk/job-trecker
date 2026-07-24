@@ -18,14 +18,18 @@ urlpatterns = [
     path('auth/logout/', views.logout_view, name='logout'),
     path('auth/me/', views.me_view, name='me'),
 
+    path('auth/password-reset/request-code/', views.request_password_reset_code_view, name='request_password_reset_code'),
+    path('auth/password-reset/verify-code/', views.verify_password_reset_code_view, name='verify_password_reset_code'),
+    path('auth/password-reset/confirm/', views.confirm_password_reset_view, name='confirm_password_reset'),
+
     path('profile-data/', views.profile_view, name='profile_view'),
+
+    path('resumes/', views.resume_home, name='resume_home'),
+    path('resumes/<int:id>/', views.resume_detail, name='resume_detail'),
 
     path('applications/', views.application_home, name='application_home'),
     path('applications/<int:id>/', views.application_detail, name='application_detail'),
 
     path('favorites/', views.favorites_home, name='favorites_home'),
     path('favorites/<int:id>/', views.favorite_detail, name='favorite_detail'),
-
-    path('users/', views.user_home, name='user_home'),
-    path('users/<int:id>/', views.user_detail, name='user_detail'),
 ]

@@ -5,13 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Profile - Job Tracker</title>
   <style>
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
 
     body {
       margin: 0;
       font-family: Arial, sans-serif;
       background: linear-gradient(180deg, #f4f4f5 0%, #e9e9ec 100%);
       color: #111111;
+      min-height: 100vh;
     }
 
     a {
@@ -28,11 +31,13 @@
     .top-shell,
     .profile-shell,
     .resumes-shell,
-    .info-box,
-    .stat-box,
     .message-box,
     .form-message,
-    .dialog-card {
+    .dialog-card,
+    .resume-card,
+    .stat-box,
+    .info-box,
+    .avatar-panel {
       background: rgba(255, 255, 255, 0.9);
       border-radius: 32px;
       box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08), 0 8px 20px rgba(0, 0, 0, 0.05);
@@ -80,7 +85,7 @@
       align-items: center;
       justify-content: center;
       font-size: 28px;
-      font-weight: bold;
+      font-weight: 700;
       box-shadow: inset 0 2px 6px rgba(255, 255, 255, 0.12), 0 6px 12px rgba(0, 0, 0, 0.25);
     }
 
@@ -89,6 +94,12 @@
       font-size: 26px;
       line-height: 1.1;
       white-space: nowrap;
+    }
+
+    .brand-copy p {
+      margin: 6px 0 0;
+      font-size: 14px;
+      color: #666666;
     }
 
     .top-nav {
@@ -149,7 +160,9 @@
     .main-button,
     .submit-button,
     .modal-close-button,
-    .upload-button {
+    .upload-button,
+    .delete-button,
+    .avatar-upload-button {
       border: none;
       padding: 14px 22px;
       border-radius: 999px;
@@ -157,18 +170,23 @@
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .main-button,
     .submit-button,
-    .upload-button {
+    .upload-button,
+    .avatar-upload-button {
       background: #111111;
       color: white;
       box-shadow: 0 12px 22px rgba(0, 0, 0, 0.18);
     }
 
     .secondary-button,
-    .modal-close-button {
+    .modal-close-button,
+    .delete-button {
       border: 1px solid #d7d7db;
       background: rgba(255, 255, 255, 0.8);
       color: #111111;
@@ -188,63 +206,85 @@
       margin-bottom: 20px;
     }
 
-    .profile-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 18px;
+    .profile-layout {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 18px;
+      align-items: start;
     }
 
-    .profile-head {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      min-width: 0;
+    .avatar-panel {
+      padding: 24px;
+      background: rgba(255, 255, 255, 0.92);
     }
 
-    .avatar-box {
-      width: 72px;
-      height: 72px;
-      border-radius: 22px;
+    .avatar-preview {
+      width: 220px;
+      height: 220px;
+      border-radius: 36px;
       background: #111111;
       color: white;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 34px;
+      font-size: 84px;
       font-weight: 700;
-      flex-shrink: 0;
+      overflow: hidden;
+      margin: 0 auto 18px;
+    }
+
+    .avatar-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
     .profile-name {
       margin: 0;
-      font-size: 22px;
+      font-size: 28px;
+      text-align: center;
     }
 
     .profile-email-top {
-      margin: 4px 0 0;
+      margin: 8px 0 0;
       color: #666666;
       font-size: 15px;
       word-break: break-word;
+      text-align: center;
+    }
+
+    .avatar-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .hidden-file-input {
+      display: none;
+    }
+
+    .profile-main {
+      display: grid;
+      gap: 18px;
+    }
+
+    .profile-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
     }
 
     .profile-settings-button {
-      width: 50px;
-      height: 50px;
+      width: 54px;
+      height: 54px;
       border-radius: 50%;
       border: 1px solid #d7d7db;
       background: rgba(255, 255, 255, 0.8);
       font-size: 20px;
       cursor: pointer;
       flex-shrink: 0;
-    }
-
-    .profile-content-grid {
-      display: grid;
-      grid-template-columns: 1.1fr 0.9fr;
-      gap: 18px;
-      align-items: start;
     }
 
     .column-title {
@@ -266,7 +306,8 @@
 
     .info-label,
     .stat-label,
-    .resume-label {
+    .resume-label,
+    .form-label {
       display: block;
       font-size: 12px;
       text-transform: uppercase;
@@ -291,7 +332,7 @@
 
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 12px;
     }
 
@@ -323,20 +364,27 @@
       margin-bottom: 18px;
     }
 
-    .resumes-subtitle {
+    .resumes-subtitle,
+    .panel-subtitle {
       margin: 6px 0 0;
       font-size: 14px;
       color: #666666;
     }
 
-    .resume-grid {
+    .resume-form {
+      margin-bottom: 20px;
+    }
+
+    .resume-grid,
+    .form-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 14px;
       align-items: end;
     }
 
-    .resume-group {
+    .resume-group,
+    .form-group {
       display: flex;
       flex-direction: column;
       gap: 8px;
@@ -382,12 +430,76 @@
       color: #444444;
     }
 
+    .resume-list {
+      display: grid;
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .resume-card {
+      padding: 18px 20px;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.88);
+    }
+
+    .resume-card-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .resume-title {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.2;
+      word-break: break-word;
+    }
+
+    .resume-meta {
+      margin: 6px 0 0;
+      font-size: 13px;
+      color: #666666;
+    }
+
+    .resume-file-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 42px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      border: 1px solid #d7d7db;
+      background: white;
+      color: #111111;
+      font-size: 13px;
+      font-weight: 700;
+      word-break: break-word;
+    }
+
+    .resume-notes {
+      margin-top: 14px;
+      color: #444444;
+      font-size: 14px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .resume-card-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
     .hidden {
       display: none !important;
     }
 
     .modal-dialog {
-      width: min(560px, calc(100vw - 32px));
+      width: min(680px, calc(100vw - 32px));
       border: none;
       padding: 0;
       background: transparent;
@@ -418,30 +530,10 @@
       font-size: 24px;
     }
 
-    .panel-subtitle {
-      margin: 6px 0 0;
-      font-size: 14px;
-      color: #666666;
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 14px;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .form-label {
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: #7a7a7a;
-      font-weight: 700;
+    .dialog-section {
+      margin-top: 22px;
+      padding-top: 22px;
+      border-top: 1px solid #e3e3e6;
     }
 
     @media (max-width: 1180px) {
@@ -450,11 +542,15 @@
         align-items: stretch;
       }
 
-      .top-nav { justify-content: flex-start; }
-      .auth-block { justify-content: flex-start; }
+      .top-nav,
+      .auth-block {
+        justify-content: flex-start;
+      }
 
-      .profile-content-grid,
-      .resume-grid {
+      .profile-layout,
+      .resume-grid,
+      .form-grid,
+      .stats-grid {
         grid-template-columns: 1fr;
       }
     }
@@ -467,7 +563,8 @@
       .top-shell,
       .profile-shell,
       .resumes-shell,
-      .dialog-card {
+      .dialog-card,
+      .avatar-panel {
         padding: 24px;
         border-radius: 24px;
       }
@@ -475,7 +572,9 @@
       .top-nav,
       .auth-block,
       .actions-row,
-      .resume-actions {
+      .resume-actions,
+      .resume-card-actions,
+      .avatar-actions {
         flex-direction: column;
         align-items: stretch;
       }
@@ -484,7 +583,9 @@
       .user-pill,
       .secondary-button,
       .main-button,
-      .upload-button {
+      .upload-button,
+      .delete-button,
+      .avatar-upload-button {
         width: 100%;
         justify-content: center;
       }
@@ -501,10 +602,6 @@
         font-size: 24px;
       }
 
-      .stats-grid {
-        grid-template-columns: 1fr;
-      }
-
       .profile-top {
         flex-direction: column;
         align-items: stretch;
@@ -513,6 +610,12 @@
       .dialog-top {
         flex-direction: column;
         align-items: stretch;
+      }
+
+      .avatar-preview {
+        width: 180px;
+        height: 180px;
+        font-size: 64px;
       }
     }
   </style>
@@ -527,12 +630,13 @@
           </div>
           <div class="brand-copy">
             <h1>Job Tracker</h1>
+            <p>Your profile and job search progress in one place.</p>
           </div>
         </div>
 
         <div class="top-nav">
           <a href="/dashboard/" class="nav-button">Applications</a>
-          <a href="/dashboard/#filters" class="nav-button">Filters</a>
+          <a href="/filters/" class="nav-button">Filters</a>
           <a href="/dashboard/#favorites" class="nav-button">Favorites</a>
           <a href="/profile/" class="nav-button active">Profile</a>
         </div>
@@ -546,51 +650,46 @@
       </div>
     </section>
 
-    <section>
-      <h2 class="section-title">Profile</h2>
+    <h2 class="section-title">Profile</h2>
 
-      <div class="profile-message-space">
-        <div id="profile-message" class="message-box hidden"></div>
-      </div>
+    <div class="profile-message-space">
+      <div id="profile-message" class="message-box hidden"></div>
+    </div>
 
-      <div class="profile-shell">
-        <div class="profile-top">
-          <div class="profile-head">
-            <div id="avatar-letter" class="avatar-box">U</div>
-            <div>
-              <h3 id="profile-name" class="profile-name">User</h3>
-              <p id="profile-email-top" class="profile-email-top">No email</p>
-            </div>
+    <section class="profile-shell">
+      <div class="profile-layout">
+        <aside class="avatar-panel">
+          <div id="avatar-preview" class="avatar-preview">U</div>
+          <h3 id="profile-name" class="profile-name">User</h3>
+          <p id="profile-email-top" class="profile-email-top">No email</p>
+
+          <div class="avatar-actions">
+            <input id="avatar-input" class="hidden-file-input" type="file" accept="image/*" />
+            <button id="choose-avatar-button" class="avatar-upload-button" type="button">Choose avatar</button>
+            <button id="save-avatar-button" class="secondary-button" type="button">Save avatar</button>
+          </div>
+        </aside>
+
+        <div class="profile-main">
+          <div class="profile-top">
+            <h3 class="column-title">Account settings</h3>
+            <button id="open-edit-profile-dialog-button" class="profile-settings-button" type="button" aria-label="Edit profile">⚙</button>
           </div>
 
-          <button id="open-edit-profile-dialog-button" class="profile-settings-button" type="button" aria-label="Edit profile">⚙</button>
-        </div>
+          <div class="info-stack">
+            <div class="info-box">
+              <span class="info-label">Username</span>
+              <div id="profile-username" class="info-value">-</div>
+            </div>
 
-        <div class="profile-content-grid">
-          <div>
-            <h3 class="column-title">Account information</h3>
-
-            <div class="info-stack">
-              <div class="info-box">
-                <span class="info-label">Username</span>
-                <div id="profile-username" class="info-value">-</div>
-              </div>
-
-              <div class="info-box">
-                <span class="info-label">Email</span>
-                <div id="profile-email" class="info-value">-</div>
-              </div>
-
-              <div class="info-box">
-                <span class="info-label">Account status</span>
-                <div class="info-value">Authenticated user</div>
-              </div>
+            <div class="info-box">
+              <span class="info-label">Email</span>
+              <div id="profile-email" class="info-value">-</div>
             </div>
           </div>
 
           <div>
             <h3 class="column-title">Application stats</h3>
-
             <div class="stats-panel">
               <div class="stats-grid">
                 <div class="stat-box">
@@ -623,41 +722,49 @@
                   <div id="stats-closed" class="stat-value">0</div>
                 </div>
               </div>
+
+              <div class="actions-row">
+                <a href="/dashboard/" class="main-button">Open dashboard</a>
+              </div>
             </div>
           </div>
         </div>
       </div>
+    </section>
 
-      <div class="resumes-shell">
-        <div class="resumes-top">
-          <h3 class="section-title">Resumes</h3>
-          <p class="resumes-subtitle">Save resume files and add notes for each version.</p>
+    <section class="resumes-shell">
+      <div class="resumes-top">
+        <h3 class="section-title">Resumes</h3>
+        <p class="resumes-subtitle">Save resume files and add notes for each version.</p>
+      </div>
+
+      <form id="resume-form" class="resume-form">
+        <div class="resume-grid">
+          <div class="resume-group">
+            <label class="resume-label" for="resume-title">Resume title</label>
+            <input id="resume-title" class="resume-input" type="text" placeholder="Frontend CV" required />
+          </div>
+
+          <div class="resume-group">
+            <label class="resume-label" for="resume-file">Resume file</label>
+            <input id="resume-file" class="resume-input" type="file" />
+          </div>
+
+          <div class="resume-group" style="grid-column: 1 / -1;">
+            <label class="resume-label" for="resume-notes">Notes</label>
+            <textarea id="resume-notes" class="resume-textarea" placeholder="Version notes, target role, language, company-specific edits..."></textarea>
+          </div>
         </div>
 
-        <form id="resume-form">
-          <div class="resume-grid">
-            <div class="resume-group">
-              <label class="resume-label" for="resume-title">Resume title</label>
-              <input id="resume-title" class="resume-input" type="text" placeholder="Frontend CV" />
-            </div>
+        <div class="resume-actions">
+          <button class="upload-button" type="submit">Save resume</button>
+        </div>
+      </form>
 
-            <div class="resume-group">
-              <label class="resume-label" for="resume-file">Resume file</label>
-              <input id="resume-file" class="resume-input" type="file" />
-            </div>
+      <div id="resume-message" class="form-message hidden"></div>
 
-            <div class="resume-group" style="grid-column: 1 / -1;">
-              <label class="resume-label" for="resume-notes">Notes</label>
-              <textarea id="resume-notes" class="resume-textarea" placeholder="Version notes, target role, language, company-specific edits..."></textarea>
-            </div>
-          </div>
-
-          <div class="resume-actions">
-            <button class="upload-button" type="submit">Save resume draft</button>
-          </div>
-        </form>
-
-        <div id="resume-message" class="form-message hidden"></div>
+      <div id="resume-list" class="resume-list">
+        <div class="message-box">No resumes yet.</div>
       </div>
     </section>
   </div>
@@ -666,8 +773,8 @@
     <div class="dialog-card">
       <div class="dialog-top">
         <div>
-          <h2 class="modal-title">Edit profile</h2>
-          <p class="panel-subtitle">Update your username and email.</p>
+          <h2 class="modal-title">Settings</h2>
+          <p class="panel-subtitle">Update your account data, password and avatar.</p>
         </div>
         <button id="close-edit-profile-dialog-button" class="modal-close-button" type="button">Close</button>
       </div>
@@ -684,11 +791,32 @@
         </div>
 
         <div class="actions-row" style="margin-top: 6px;">
-          <button class="submit-button" type="submit">Save changes</button>
+          <button class="submit-button" type="submit">Save profile</button>
         </div>
       </form>
 
       <div id="edit-profile-message" class="form-message hidden"></div>
+
+      <div class="dialog-section">
+        <h3 class="column-title">Change password</h3>
+        <form id="change-password-form" class="form-grid">
+          <div class="form-group">
+            <label class="form-label" for="current-password">Current password</label>
+            <input id="current-password" class="form-input" type="password" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="new-password">New password</label>
+            <input id="new-password" class="form-input" type="password" />
+          </div>
+
+          <div class="actions-row" style="margin-top: 6px;">
+            <button class="submit-button" type="submit">Update password</button>
+          </div>
+        </form>
+
+        <div id="password-message" class="form-message hidden"></div>
+      </div>
     </div>
   </dialog>
 
@@ -743,7 +871,7 @@
           <input id="register-email" class="form-input" type="email" />
         </div>
 
-        <div class="form-group">
+        <div class="form-group" style="grid-column: 1 / -1;">
           <label class="form-label" for="register-password">Password</label>
           <input id="register-password" class="form-input" type="password" required />
         </div>
@@ -770,7 +898,7 @@
     const profileEmailTop = document.getElementById('profile-email-top');
     const profileUsername = document.getElementById('profile-username');
     const profileEmail = document.getElementById('profile-email');
-    const avatarLetter = document.getElementById('avatar-letter');
+    const avatarPreview = document.getElementById('avatar-preview');
 
     const statsTotal = document.getElementById('stats-total');
     const statsApplied = document.getElementById('stats-applied');
@@ -785,10 +913,11 @@
     const editProfileForm = document.getElementById('edit-profile-form');
     const editProfileMessage = document.getElementById('edit-profile-message');
 
+    const changePasswordForm = document.getElementById('change-password-form');
+    const passwordMessage = document.getElementById('password-message');
+
     const loginDialog = document.getElementById('login-dialog');
     const registerDialog = document.getElementById('register-dialog');
-    const openLoginButton = document.getElementById('open-login-dialog-button');
-    const openRegisterButton = document.getElementById('open-register-dialog-button');
     const closeLoginDialogButton = document.getElementById('close-login-dialog-button');
     const closeRegisterDialogButton = document.getElementById('close-register-dialog-button');
     const loginForm = document.getElementById('login-form');
@@ -797,6 +926,13 @@
     const registerFormMessage = document.getElementById('register-form-message');
 
     const resumeForm = document.getElementById('resume-form');
+    const resumeList = document.getElementById('resume-list');
+
+    const avatarInput = document.getElementById('avatar-input');
+    const chooseAvatarButton = document.getElementById('choose-avatar-button');
+    const saveAvatarButton = document.getElementById('save-avatar-button');
+
+    let selectedAvatarFile = null;
 
     function escapeHtml(value) {
       if (value === null || value === undefined) return '';
@@ -819,11 +955,15 @@
     }
 
     function openDialog(dialog) {
-      if (!dialog.open) dialog.showModal();
+      if (!dialog.open) {
+        dialog.showModal();
+      }
     }
 
     function closeDialog(dialog) {
-      if (dialog.open) dialog.close();
+      if (dialog.open) {
+        dialog.close();
+      }
     }
 
     async function requestJson(url, options = {}) {
@@ -841,9 +981,21 @@
       return data;
     }
 
+    function renderAvatar(username, avatarUrl) {
+      if (avatarUrl) {
+        avatarPreview.innerHTML = `<img src="${escapeHtml(avatarUrl)}" alt="Avatar" />`;
+        return;
+      }
+
+      const firstLetter = (username || 'U').charAt(0).toUpperCase() || 'U';
+      avatarPreview.textContent = firstLetter;
+    }
+
     function applyProfileData(data) {
       const user = data.user || {};
+      const profile = data.profile || {};
       const stats = data.stats || {};
+      const resumes = data.resumes || [];
 
       const username = user.username || 'User';
       const email = user.email || 'No email';
@@ -852,7 +1004,8 @@
       profileEmailTop.textContent = email;
       profileUsername.textContent = username;
       profileEmail.textContent = email;
-      avatarLetter.textContent = username.charAt(0).toUpperCase() || 'U';
+
+      renderAvatar(username, profile.avatar_url || '');
 
       statsTotal.textContent = stats.total ?? 0;
       statsApplied.textContent = stats.applied ?? 0;
@@ -863,6 +1016,41 @@
 
       document.getElementById('edit-profile-username').value = user.username || '';
       document.getElementById('edit-profile-email').value = user.email || '';
+
+      renderResumeList(resumes);
+    }
+
+    function renderResumeList(resumes) {
+      if (!resumes.length) {
+        resumeList.innerHTML = `<div class="message-box">No resumes yet.</div>`;
+        return;
+      }
+
+      let html = '';
+
+      for (const resume of resumes) {
+        const fileLink = resume.file_url
+          ? `<a class="resume-file-link" href="${escapeHtml(resume.file_url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(resume.file_name || 'Open file')}</a>`
+          : `<div class="resume-file-link">No file</div>`;
+
+        html += `
+          <article class="resume-card">
+            <div class="resume-card-top">
+              <div>
+                <h4 class="resume-title">${escapeHtml(resume.title || 'Untitled resume')}</h4>
+                <p class="resume-meta">Updated: ${escapeHtml(resume.updated_at || '')}</p>
+              </div>
+              ${fileLink}
+            </div>
+            <div class="resume-notes">${escapeHtml(resume.notes || 'No notes')}</div>
+            <div class="resume-card-actions">
+              <button class="delete-button" type="button" onclick="deleteResume(${resume.id})">Delete</button>
+            </div>
+          </article>
+        `;
+      }
+
+      resumeList.innerHTML = html;
     }
 
     async function checkAuth() {
@@ -873,13 +1061,11 @@
           authUserBox.classList.remove('hidden');
           authUserBox.textContent = data.user.username;
           logoutButton.classList.remove('hidden');
-
           openLoginDialogButton.style.display = 'none';
           openRegisterDialogButton.style.display = 'none';
         } else {
           authUserBox.classList.add('hidden');
           logoutButton.classList.add('hidden');
-
           openLoginDialogButton.style.display = 'inline-flex';
           openRegisterDialogButton.style.display = 'inline-flex';
         }
@@ -914,14 +1100,99 @@
       try {
         const data = await requestJson('/profile-data/', {
           method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+          },
           body: JSON.stringify(payload),
         });
 
         applyProfileData(data);
-        closeDialog(editProfileDialog);
+        showMessage(profileMessage, data.message || 'Profile updated successfully.');
+        showMessage(editProfileMessage, data.message || 'Profile updated successfully.');
       } catch (error) {
         showMessage(editProfileMessage, error.message);
+      }
+    });
+
+    changePasswordForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      hideMessage(passwordMessage);
+
+      const formData = new FormData();
+      formData.append('current_password', document.getElementById('current-password').value);
+      formData.append('new_password', document.getElementById('new-password').value);
+
+      try {
+        const response = await fetch('/profile-data/', {
+          method: 'POST',
+          credentials: 'same-origin',
+          body: formData,
+        });
+
+        const data = await response.json().catch(() => null);
+
+        if (!response.ok) {
+          throw new Error((data && data.error) || 'Request failed');
+        }
+
+        changePasswordForm.reset();
+        applyProfileData(data);
+        showMessage(passwordMessage, data.message || 'Password updated successfully.');
+        showMessage(profileMessage, data.message || 'Password updated successfully.');
+      } catch (error) {
+        showMessage(passwordMessage, error.message);
+      }
+    });
+
+    chooseAvatarButton.addEventListener('click', () => {
+      avatarInput.click();
+    });
+
+    avatarInput.addEventListener('change', () => {
+      const file = avatarInput.files[0];
+      selectedAvatarFile = file || null;
+
+      if (!file) {
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        avatarPreview.innerHTML = `<img src="${reader.result}" alt="Avatar preview" />`;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    saveAvatarButton.addEventListener('click', async () => {
+      hideMessage(profileMessage);
+
+      if (!selectedAvatarFile) {
+        showMessage(profileMessage, 'Choose an avatar first.');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('avatar', selectedAvatarFile);
+
+      try {
+        const response = await fetch('/profile-data/', {
+          method: 'POST',
+          credentials: 'same-origin',
+          body: formData,
+        });
+
+        const data = await response.json().catch(() => null);
+
+        if (!response.ok) {
+          throw new Error((data && data.error) || 'Request failed');
+        }
+
+        selectedAvatarFile = null;
+        avatarInput.value = '';
+        applyProfileData(data);
+        showMessage(profileMessage, data.message || 'Avatar updated successfully.');
+      } catch (error) {
+        showMessage(profileMessage, error.message);
       }
     });
 
@@ -937,7 +1208,9 @@
       try {
         await requestJson('/auth/login/', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+          },
           body: JSON.stringify(payload),
         });
 
@@ -963,7 +1236,9 @@
       try {
         await requestJson('/auth/register/', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+          },
           body: JSON.stringify(payload),
         });
 
@@ -978,7 +1253,10 @@
 
     logoutButton.addEventListener('click', async () => {
       try {
-        await requestJson('/auth/logout/', { method: 'POST' });
+        await requestJson('/auth/logout/', {
+          method: 'POST',
+        });
+
         await checkAuth();
         showMessage(profileMessage, 'You have been logged out.');
 
@@ -986,33 +1264,105 @@
         profileEmailTop.textContent = 'No email';
         profileUsername.textContent = '-';
         profileEmail.textContent = '-';
-        avatarLetter.textContent = 'U';
-        statsTotal.textContent = '0';
-        statsApplied.textContent = '0';
-        statsInterview.textContent = '0';
-        statsOffer.textContent = '0';
-        statsRejected.textContent = '0';
-        statsClosed.textContent = '0';
+        renderAvatar('U', '');
+
+        statsTotal.textContent = 0;
+        statsApplied.textContent = 0;
+        statsInterview.textContent = 0;
+        statsOffer.textContent = 0;
+        statsRejected.textContent = 0;
+        statsClosed.textContent = 0;
+
+        resumeList.innerHTML = `<div class="message-box">No resumes yet.</div>`;
       } catch (error) {
         showMessage(profileMessage, error.message);
       }
     });
 
-    resumeForm.addEventListener('submit', (event) => {
+    resumeForm.addEventListener('submit', async (event) => {
       event.preventDefault();
-      showMessage(resumeMessage, 'Resume block is back in the layout. File upload backend can be connected next.');
+      hideMessage(resumeMessage);
+
+      const formData = new FormData();
+      formData.append('title', document.getElementById('resume-title').value.trim());
+      formData.append('notes', document.getElementById('resume-notes').value.trim());
+
+      const fileInput = document.getElementById('resume-file');
+      if (fileInput.files[0]) {
+        formData.append('file', fileInput.files[0]);
+      }
+
+      try {
+        const response = await fetch('/resumes/', {
+          method: 'POST',
+          credentials: 'same-origin',
+          body: formData,
+        });
+
+        const data = await response.json().catch(() => null);
+
+        if (!response.ok) {
+          throw new Error((data && data.error) || 'Request failed');
+        }
+
+        resumeForm.reset();
+        showMessage(resumeMessage, 'Resume saved successfully.');
+        await loadProfile();
+      } catch (error) {
+        showMessage(resumeMessage, error.message);
+      }
     });
+
+    async function deleteResume(id) {
+      hideMessage(resumeMessage);
+
+      try {
+        const response = await fetch(`/resumes/${id}/`, {
+          method: 'DELETE',
+          credentials: 'same-origin',
+        });
+
+        if (!response.ok) {
+          const data = await response.json().catch(() => null);
+          throw new Error((data && data.error) || 'Delete failed');
+        }
+
+        showMessage(resumeMessage, 'Resume deleted successfully.');
+        await loadProfile();
+      } catch (error) {
+        showMessage(resumeMessage, error.message);
+      }
+    }
+
+    window.deleteResume = deleteResume;
 
     openEditProfileDialogButton.addEventListener('click', () => {
       hideMessage(editProfileMessage);
+      hideMessage(passwordMessage);
       openDialog(editProfileDialog);
     });
 
-    closeEditProfileDialogButton.addEventListener('click', () => closeDialog(editProfileDialog));
-    openLoginButton.addEventListener('click', () => openDialog(loginDialog));
-    openRegisterButton.addEventListener('click', () => openDialog(registerDialog));
-    closeLoginDialogButton.addEventListener('click', () => closeDialog(loginDialog));
-    closeRegisterDialogButton.addEventListener('click', () => closeDialog(registerDialog));
+    closeEditProfileDialogButton.addEventListener('click', () => {
+      closeDialog(editProfileDialog);
+    });
+
+    openLoginDialogButton.addEventListener('click', () => {
+      hideMessage(loginFormMessage);
+      openDialog(loginDialog);
+    });
+
+    openRegisterDialogButton.addEventListener('click', () => {
+      hideMessage(registerFormMessage);
+      openDialog(registerDialog);
+    });
+
+    closeLoginDialogButton.addEventListener('click', () => {
+      closeDialog(loginDialog);
+    });
+
+    closeRegisterDialogButton.addEventListener('click', () => {
+      closeDialog(registerDialog);
+    });
 
     checkAuth();
     loadProfile();

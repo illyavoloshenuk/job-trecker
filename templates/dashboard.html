@@ -789,7 +789,6 @@
 
   <button id="open-create-dialog-button" class="floating-create-button" type="button" aria-label="Create application">+</button>
 
-  <!-- Диалог создания заявки -->
   <dialog id="create-dialog" class="modal-dialog">
     <div class="dialog-card">
       <div class="dialog-top">
@@ -872,6 +871,163 @@
         <div class="form-actions">
           <button class="submit-button" type="submit">Save application</button>
           <button class="secondary-button" type="button" id="clear-create-button">Clear</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <dialog id="edit-dialog" class="modal-dialog">
+    <div class="dialog-card">
+      <div class="dialog-top">
+        <div class="dialog-top-left">
+          <h2 class="modal-title">Edit application</h2>
+          <p class="filters-subtitle">Update an existing job application.</p>
+        </div>
+        <button id="close-edit-dialog-button" class="modal-close-button" type="button">Close</button>
+      </div>
+
+      <form id="edit-form">
+        <input id="edit-id" type="hidden" />
+
+        <div id="edit-form-message" class="form-message hidden"></div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label" for="edit-title">Title</label>
+            <input id="edit-title" class="form-input" type="text" required />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="edit-company">Company</label>
+            <input id="edit-company" class="form-input" type="text" required />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="edit-status">Status</label>
+            <select id="edit-status" class="form-select" required>
+              <option value="applied">Applied</option>
+              <option value="interview">Interview</option>
+              <option value="offer">Offer</option>
+              <option value="rejected">Rejected</option>
+              <option value="closed">Closed</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="edit-label-color">Label color</label>
+            <select id="edit-label-color" class="form-select">
+              <option value="none">None</option>
+              <option value="blue">Blue</option>
+              <option value="green">Green</option>
+              <option value="yellow">Yellow</option>
+              <option value="pink">Pink</option>
+              <option value="purple">Purple</option>
+              <option value="gray">Gray</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="edit-date-applied">Date applied</label>
+            <input id="edit-date-applied" class="form-input" type="date" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="edit-job-link">Job link</label>
+            <input id="edit-job-link" class="form-input" type="url" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="edit-location">Location</label>
+            <input id="edit-location" class="form-input" type="text" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="edit-salary">Salary</label>
+            <input id="edit-salary" class="form-input" type="text" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="edit-contact-name">Contact name</label>
+            <input id="edit-contact-name" class="form-input" type="text" />
+          </div>
+
+          <div class="form-group" style="grid-column: 1 / -1;">
+            <label class="form-label" for="edit-notes">Notes</label>
+            <textarea id="edit-notes" class="form-textarea"></textarea>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="submit-button" type="submit">Save changes</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <dialog id="login-dialog" class="modal-dialog">
+    <div class="dialog-card">
+      <div class="dialog-top">
+        <div class="dialog-top-left">
+          <h2 class="modal-title">Login</h2>
+          <p class="filters-subtitle">Sign in to your account.</p>
+        </div>
+        <button id="close-login-dialog-button" class="modal-close-button" type="button">Close</button>
+      </div>
+
+      <form id="login-form">
+        <div id="login-form-message" class="form-message hidden"></div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label" for="login-username">Username</label>
+            <input id="login-username" class="form-input" type="text" required />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="login-password">Password</label>
+            <input id="login-password" class="form-input" type="password" required />
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="submit-button" type="submit">Login</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <dialog id="register-dialog" class="modal-dialog">
+    <div class="dialog-card">
+      <div class="dialog-top">
+        <div class="dialog-top-left">
+          <h2 class="modal-title">Register</h2>
+          <p class="filters-subtitle">Create a new account.</p>
+        </div>
+        <button id="close-register-dialog-button" class="modal-close-button" type="button">Close</button>
+      </div>
+
+      <form id="register-form">
+        <div id="register-form-message" class="form-message hidden"></div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label" for="register-username">Username</label>
+            <input id="register-username" class="form-input" type="text" required />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="register-email">Email</label>
+            <input id="register-email" class="form-input" type="email" />
+          </div>
+
+          <div class="form-group" style="grid-column: 1 / -1;">
+            <label class="form-label" for="register-password">Password</label>
+            <input id="register-password" class="form-input" type="password" required />
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="submit-button" type="submit">Register</button>
         </div>
       </form>
     </div>
@@ -1115,38 +1271,17 @@
       try {
         const data = await requestJson(`/applications/${id}/`);
 
-        const editId = document.getElementById('edit-id');
-        const editTitle = document.getElementById('edit-title');
-        const editCompany = document.getElementById('edit-company');
-        const editStatus = document.getElementById('edit-status');
-        const editLabelColor = document.getElementById('edit-label-color');
-        const editDateApplied = document.getElementById('edit-date-applied');
-        const editJobLink = document.getElementById('edit-job-link');
-        const editLocation = document.getElementById('edit-location');
-        const editSalary = document.getElementById('edit-salary');
-        const editContactName = document.getElementById('edit-contact-name');
-        const editNotes = document.getElementById('edit-notes');
-
-        if (
-          !editId || !editTitle || !editCompany || !editStatus || !editLabelColor ||
-          !editDateApplied || !editJobLink || !editLocation || !editSalary ||
-          !editContactName || !editNotes
-        ) {
-          alert('Edit form is not configured yet.');
-          return;
-        }
-
-        editId.value = data.id;
-        editTitle.value = data.title || '';
-        editCompany.value = data.company || '';
-        editStatus.value = data.status || 'applied';
-        editLabelColor.value = data.label_color || 'none';
-        editDateApplied.value = data.date_applied || '';
-        editJobLink.value = data.job_link || '';
-        editLocation.value = data.location || '';
-        editSalary.value = data.salary || '';
-        editContactName.value = data.contact_name || '';
-        editNotes.value = data.notes || '';
+        document.getElementById('edit-id').value = data.id;
+        document.getElementById('edit-title').value = data.title || '';
+        document.getElementById('edit-company').value = data.company || '';
+        document.getElementById('edit-status').value = data.status || 'applied';
+        document.getElementById('edit-label-color').value = data.label_color || 'none';
+        document.getElementById('edit-date-applied').value = data.date_applied || '';
+        document.getElementById('edit-job-link').value = data.job_link || '';
+        document.getElementById('edit-location').value = data.location || '';
+        document.getElementById('edit-salary').value = data.salary || '';
+        document.getElementById('edit-contact-name').value = data.contact_name || '';
+        document.getElementById('edit-notes').value = data.notes || '';
 
         hideMessage(editFormMessage);
         openDialog(editDialog);
