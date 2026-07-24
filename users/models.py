@@ -68,6 +68,13 @@ class JobApplication(models.Model):
     contact_name = models.CharField(max_length=255, blank=True)
     notes = models.TextField(blank=True)
     is_favorite = models.BooleanField(default=False)
+    resume = models.ForeignKey(
+        'Resume',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='applications'
+    )
 
     def __str__(self):
         return f"{self.title} - {self.company}"

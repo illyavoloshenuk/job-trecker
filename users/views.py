@@ -36,6 +36,10 @@ def serialize_application(application):
         'contact_name': application.contact_name,
         'notes': application.notes,
         'is_favorite': application.is_favorite,
+        'resume_id': application.resume.id if application.resume else None,
+        'resume_title': application.resume.title if application.resume else '',
+        'resume_file_url': application.resume.file.url if application.resume and application.resume.file else '',
+        'resume_file_name': application.resume.file.name.split('/')[-1] if application.resume and application.resume.file else '',
     }
 
 
@@ -561,6 +565,7 @@ def application_home(request):
         company = body.get('company')
         status_value = body.get('status')
         label_color_value = body.get('label_color', JobApplication.LabelColor.NONE)
+        resume_id = body.get('resume_id')
 
         if not title or not company or not status_value:
             return JsonResponse({'error': 'title, company and status are required'}, status=400)
@@ -572,6 +577,13 @@ def application_home(request):
         allowed_colors = [choice[0] for choice in JobApplication.LabelColor.choices]
         if label_color_value not in allowed_colors:
             return JsonResponse({'error': 'Invalid label color'}, status=400)
+
+        resume = None
+        if resume_id:
+            try:
+                resume = Resume.objects.get(id=resume_id, user=request.user)
+            except Resume.DoesNotExist:
+                return JsonResponse({'error': 'Resume not found'}, status=404)
 
         application = JobApplication.objects.create(
             user=request.user,
@@ -585,6 +597,7 @@ def application_home(request):
             salary=body.get('salary', ''),
             contact_name=body.get('contact_name', ''),
             notes=body.get('notes', ''),
+            resume=resume,
         )
 
         return JsonResponse(serialize_application(application), status=201)
@@ -649,6 +662,17 @@ def application_detail(request, id):
 
         if 'is_favorite' in body:
             application.is_favorite = bool(body['is_favorite'])
+
+        if 'resume_id' in body:
+            resume_id = body['resume_id']
+
+            if resume_id:
+                try:
+                    application.resume = Resume.objects.get(id=resume_id, user=request.user)
+                except Resume.DoesNotExist:
+                    return JsonResponse({'error': 'Resume not found'}, status=404)
+            else:
+                application.resume = None
 
         application.save()
 

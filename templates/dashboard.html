@@ -863,6 +863,13 @@
           </div>
 
           <div class="form-group" style="grid-column: 1 / -1;">
+            <label class="form-label" for="create-resume">Resume</label>
+            <select id="create-resume" class="form-select">
+              <option value="">No resume</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="grid-column: 1 / -1;">
             <label class="form-label" for="create-notes">Notes</label>
             <textarea id="create-notes" class="form-textarea" placeholder="Any details about this application"></textarea>
           </div>
@@ -949,6 +956,13 @@
           <div class="form-group">
             <label class="form-label" for="edit-contact-name">Contact name</label>
             <input id="edit-contact-name" class="form-input" type="text" />
+          </div>
+
+          <div class="form-group" style="grid-column: 1 / -1;">
+            <label class="form-label" for="edit-resume">Resume</label>
+            <select id="edit-resume" class="form-select">
+              <option value="">No resume</option>
+            </select>
           </div>
 
           <div class="form-group" style="grid-column: 1 / -1;">
@@ -1082,6 +1096,11 @@
     const dateFromFilter = document.getElementById('date-from-filter');
     const dateToFilter = document.getElementById('date-to-filter');
 
+    const createResumeSelect = document.getElementById('create-resume');
+    const editResumeSelect = document.getElementById('edit-resume');
+
+    let currentResumes = [];
+
     function escapeHtml(value) {
       if (value === null || value === undefined) return '';
       return String(value)
@@ -1117,6 +1136,47 @@
       return `label-${color || 'none'}`;
     }
 
+    async function requestJson(url, options = {}) {
+      const response = await fetch(url, {
+        credentials: 'same-origin',
+        ...options,
+      });
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error((data && data.error) || 'Request failed');
+      }
+
+      return data;
+    }
+
+    function renderResumeOptions(selectElement, selectedValue = '') {
+      if (!selectElement) return;
+
+      let html = '<option value="">No resume</option>';
+
+      for (const resume of currentResumes) {
+        const isSelected = String(resume.id) === String(selectedValue) ? 'selected' : '';
+        html += `<option value="${resume.id}" ${isSelected}>${escapeHtml(resume.title)}</option>`;
+      }
+
+      selectElement.innerHTML = html;
+    }
+
+    async function loadResumes() {
+      try {
+        const data = await requestJson('/resumes/');
+        currentResumes = data.resumes || [];
+        renderResumeOptions(createResumeSelect);
+        renderResumeOptions(editResumeSelect);
+      } catch (error) {
+        currentResumes = [];
+        renderResumeOptions(createResumeSelect);
+        renderResumeOptions(editResumeSelect);
+      }
+    }
+
     function renderApplicationCard(application) {
       const favoriteActiveClass = application.is_favorite ? 'active' : '';
       const favoriteText = application.is_favorite ? '★ Favorite' : '☆ Favorite';
@@ -1145,90 +1205,96 @@
             </div>
 
             <div class="detail-row">
+              <span class="detail-label">Job link</span>
+              <span class="detail-value">
+                ${application.job_link
+                  ? `<a href="${escapeHtml(application.job_link)}" target="_blank" rel="noopener noreferrer">${escapeHtml(application.job_link)}</a>`
+                  : 'Not set'}
+              </span>
+            </div>
+
+            <div class="detail-row">
               <span class="detail-label">Location</span>
-              <span class="detail-value">${escapeHtml(application.location || 'Not set')}</span>
+              <span class="detail-value">${application.location ? escapeHtml(application.location) : 'Not set'}</span>
             </div>
 
             <div class="detail-row">
               <span class="detail-label">Salary</span>
-              <span class="detail-value">${escapeHtml(application.salary || 'Not set')}</span>
+              <span class="detail-value">${application.salary ? escapeHtml(application.salary) : 'Not set'}</span>
             </div>
 
             <div class="detail-row">
               <span class="detail-label">Contact name</span>
-              <span class="detail-value">${escapeHtml(application.contact_name || 'Not set')}</span>
+              <span class="detail-value">${application.contact_name ? escapeHtml(application.contact_name) : 'Not set'}</span>
             </div>
 
             <div class="detail-row">
-              <span class="detail-label">Job link</span>
+              <span class="detail-label">Resume</span>
               <span class="detail-value">
-                ${application.job_link ? `<a href="${escapeHtml(application.job_link)}" target="_blank" rel="noopener noreferrer">${escapeHtml(application.job_link)}</a>` : 'Not set'}
+                ${application.resume_file_url
+                  ? `<a href="${escapeHtml(application.resume_file_url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(application.resume_title || application.resume_file_name)}</a>`
+                  : (application.resume_title ? escapeHtml(application.resume_title) : 'Not selected')}
               </span>
             </div>
 
             <div class="detail-row">
               <span class="detail-label">Notes</span>
-              <span class="detail-value">${escapeHtml(application.notes || 'No notes')}</span>
+              <span class="detail-value">${application.notes ? escapeHtml(application.notes) : 'No notes'}</span>
             </div>
           </div>
 
           <div class="card-actions">
             <button class="card-action-button" type="button" onclick="openEditDialog(${application.id})">Edit</button>
-            <button class="favorite-button ${favoriteActiveClass}" type="button" onclick="toggleFavorite(${application.id}, ${application.is_favorite ? `'false'` : `'true'`})">${favoriteText}</button>
+            <button class="favorite-button ${favoriteActiveClass}" type="button" onclick="toggleFavorite(${application.id}, '${!application.is_favorite}')">${favoriteText}</button>
             <button class="delete-button" type="button" onclick="deleteApplication(${application.id})">Delete</button>
           </div>
         </article>
       `;
     }
 
-    function renderApplications(element, applications, emptyText) {
+    function renderApplications(targetElement, applications, emptyText) {
+      if (!targetElement) return;
+
       if (!applications.length) {
-        element.innerHTML = `<div class="empty-box">${escapeHtml(emptyText)}</div>`;
+        targetElement.innerHTML = `<div class="empty-box">${escapeHtml(emptyText)}</div>`;
         return;
       }
 
-      element.innerHTML = `<div class="applications-grid">${applications.map(renderApplicationCard).join('')}</div>`;
-    }
-
-    async function requestJson(url, options = {}) {
-      const response = await fetch(url, {
-        credentials: 'same-origin',
-        ...options,
-      });
-
-      const data = await response.json().catch(() => null);
-
-      if (!response.ok) {
-        throw new Error((data && data.error) || 'Request failed');
-      }
-
-      return data;
+      targetElement.innerHTML = `<div class="applications-grid">${applications.map(renderApplicationCard).join('')}</div>`;
     }
 
     async function loadApplications() {
-      applicationsContainer.innerHTML = '<div class="message-box">Loading applications...</div>';
+      applicationsContainer.innerHTML = 'Loading applications...';
 
       try {
         const data = await requestJson('/applications/');
-        renderApplications(applicationsContainer, data.applications || [], 'No applications yet.');
+        renderApplications(
+          applicationsContainer,
+          data.applications || [],
+          'No applications found.'
+        );
       } catch (error) {
-        applicationsContainer.innerHTML = `<div class="empty-box">${escapeHtml(error.message)}</div>`;
+        applicationsContainer.innerHTML = `<div class="message-box">${escapeHtml(error.message)}</div>`;
       }
     }
 
     async function loadFavorites() {
-      favoritesContainer.innerHTML = '<div class="message-box">Loading favorites...</div>';
+      favoritesContainer.innerHTML = 'Loading favorites...';
 
       try {
         const data = await requestJson('/favorites/');
-        renderApplications(favoritesContainer, data.applications || [], 'No favorite applications yet.');
+        renderApplications(
+          favoritesContainer,
+          data.applications || [],
+          'No favorite applications yet.'
+        );
       } catch (error) {
-        favoritesContainer.innerHTML = `<div class="empty-box">${escapeHtml(error.message)}</div>`;
+        favoritesContainer.innerHTML = `<div class="message-box">${escapeHtml(error.message)}</div>`;
       }
     }
 
     async function applyFilters() {
-      filtersResults.innerHTML = '<div class="message-box">Loading filtered results...</div>';
+      filtersResults.innerHTML = '<div class="message-box">Loading filtered applications...</div>';
 
       const params = new URLSearchParams();
 
@@ -1240,12 +1306,16 @@
       if (dateToFilter.value) params.append('date_to', dateToFilter.value);
 
       try {
-        const query = params.toString();
-        const url = query ? `/applications/?${query}` : '/applications/';
+        const url = params.toString() ? `/applications/?${params.toString()}` : '/applications/';
         const data = await requestJson(url);
-        renderApplications(filtersResults, data.applications || [], 'No applications matched these filters.');
+
+        renderApplications(
+          filtersResults,
+          data.applications || [],
+          'No applications match your filters.'
+        );
       } catch (error) {
-        filtersResults.innerHTML = `<div class="empty-box">${escapeHtml(error.message)}</div>`;
+        filtersResults.innerHTML = `<div class="message-box">${escapeHtml(error.message)}</div>`;
       }
     }
 
@@ -1282,6 +1352,9 @@
         document.getElementById('edit-salary').value = data.salary || '';
         document.getElementById('edit-contact-name').value = data.contact_name || '';
         document.getElementById('edit-notes').value = data.notes || '';
+
+        await loadResumes();
+        document.getElementById('edit-resume').value = data.resume_id || '';
 
         hideMessage(editFormMessage);
         openDialog(editDialog);
@@ -1338,6 +1411,7 @@
           openLoginDialogButton.style.display = 'none';
           openRegisterDialogButton.style.display = 'none';
 
+          await loadResumes();
           await loadApplications();
           await loadFavorites();
         } else {
@@ -1420,6 +1494,7 @@
           salary: document.getElementById('create-salary')?.value.trim() || '',
           contact_name: document.getElementById('create-contact-name')?.value.trim() || '',
           notes: document.getElementById('create-notes')?.value.trim() || '',
+          resume_id: document.getElementById('create-resume')?.value || '',
         };
 
         try {
@@ -1430,6 +1505,7 @@
           });
 
           createForm.reset();
+          renderResumeOptions(createResumeSelect);
           closeDialog(createDialog);
           await loadApplications();
           await loadFavorites();
@@ -1439,19 +1515,12 @@
       });
     }
 
-    if (clearCreateButton && createForm) {
-      clearCreateButton.addEventListener('click', () => {
-        createForm.reset();
-        hideMessage(createFormMessage);
-      });
-    }
-
     if (editForm) {
       editForm.addEventListener('submit', async (event) => {
         event.preventDefault();
         hideMessage(editFormMessage);
 
-        const id = document.getElementById('edit-id')?.value;
+        const id = document.getElementById('edit-id').value;
 
         const payload = {
           title: document.getElementById('edit-title')?.value.trim() || '',
@@ -1464,6 +1533,7 @@
           salary: document.getElementById('edit-salary')?.value.trim() || '',
           contact_name: document.getElementById('edit-contact-name')?.value.trim() || '',
           notes: document.getElementById('edit-notes')?.value.trim() || '',
+          resume_id: document.getElementById('edit-resume')?.value || '',
         };
 
         try {
@@ -1479,6 +1549,14 @@
         } catch (error) {
           showMessage(editFormMessage, error.message);
         }
+      });
+    }
+
+    if (clearCreateButton) {
+      clearCreateButton.addEventListener('click', () => {
+        createForm.reset();
+        hideMessage(createFormMessage);
+        renderResumeOptions(createResumeSelect);
       });
     }
 
@@ -1499,8 +1577,8 @@
             body: JSON.stringify(payload),
           });
 
-          closeDialog(loginDialog);
           loginForm.reset();
+          closeDialog(loginDialog);
           await checkAuth();
         } catch (error) {
           showMessage(loginFormMessage, error.message);
@@ -1526,8 +1604,8 @@
             body: JSON.stringify(payload),
           });
 
-          closeDialog(registerDialog);
           registerForm.reset();
+          closeDialog(registerDialog);
           await checkAuth();
         } catch (error) {
           showMessage(registerFormMessage, error.message);
@@ -1581,7 +1659,10 @@
     }
 
     if (openCreateDialogButton) {
-      openCreateDialogButton.addEventListener('click', () => openDialog(createDialog));
+      openCreateDialogButton.addEventListener('click', async () => {
+        await loadResumes();
+        openDialog(createDialog);
+      });
     }
     if (closeCreateDialogButton) {
       closeCreateDialogButton.addEventListener('click', () => closeDialog(createDialog));
