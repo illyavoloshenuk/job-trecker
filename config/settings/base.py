@@ -9,7 +9,9 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-
+from pathlib import Path
+import os
+import certifi
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -112,6 +114,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'your_email@gmail.com'
-EMAIL_HOST_PASSWORD = 'your_app_password'
+EMAIL_HOST_USER = 'jobtracker.sms@gmail.com'
+EMAIL_HOST_PASSWORD = 'vqtb lufk npqq pzcf'
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+os.environ['SSL_CERT_FILE'] = certifi.where()

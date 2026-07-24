@@ -260,14 +260,23 @@ def request_password_reset_code_view(request):
 
     try:
         send_mail(
-            subject='Your Job Tracker password reset code',
-            message=f'Your verification code is: {reset_code.code}',
+            subject='Job Tracker password reset code',
+            message=(
+                f'Hello, {user.username}!\n\n'
+                f'We received a request to reset the password for your Job Tracker account.\n\n'
+                f'Your verification code is:\n'
+                f'{reset_code.code}\n\n'
+                f'This code will expire in 10 minutes.\n\n'
+                f'If you did not request a password reset, you can safely ignore this email.\n\n'
+                f'Best regards,\n'
+                f'Job Tracker Team'
+            ),
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[user.email],
             fail_silently=False,
         )
-    except Exception:
-        return JsonResponse({'error': 'Failed to send email. Check email settings.'}, status=500)
+    except Exception as error:
+        return JsonResponse({'error': str(error)}, status=500)
 
     return JsonResponse({
         'message': 'Verification code sent successfully'
