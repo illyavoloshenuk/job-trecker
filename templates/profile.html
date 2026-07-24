@@ -470,9 +470,9 @@
       min-height: 42px;
       padding: 10px 16px;
       border-radius: 999px;
-      border: 1px solid #d7d7db;
-      background: white;
-      color: #111111;
+      border: 1px solid #111111;
+      background: #111111;
+      color: white;
       font-size: 13px;
       font-weight: 700;
       word-break: break-word;
@@ -933,6 +933,8 @@
     const saveAvatarButton = document.getElementById('save-avatar-button');
 
     let selectedAvatarFile = null;
+    let editingResumeId = null;
+    let currentResumes = [];
 
     function escapeHtml(value) {
       if (value === null || value === undefined) return '';
@@ -1021,6 +1023,8 @@
     }
 
     function renderResumeList(resumes) {
+      currentResumes = resumes;
+
       if (!resumes.length) {
         resumeList.innerHTML = `<div class="message-box">No resumes yet.</div>`;
         return;
@@ -1029,6 +1033,45 @@
       let html = '';
 
       for (const resume of resumes) {
+        const isEditing = editingResumeId === resume.id;
+
+        if (isEditing) {
+          html += `
+            <article class="resume-card">
+              <div class="resume-card-top">
+                <div style="width: 100%;">
+                  <label class="resume-label" for="edit-resume-title-${resume.id}">Resume title</label>
+                  <input
+                    id="edit-resume-title-${resume.id}"
+                    class="resume-input"
+                    type="text"
+                    value="${escapeHtml(resume.title || '')}"
+                  />
+                </div>
+              </div>
+
+              <div class="resume-group" style="margin-top: 14px;">
+                <label class="resume-label" for="edit-resume-file-${resume.id}">Resume file</label>
+                <input id="edit-resume-file-${resume.id}" class="resume-input" type="file" />
+              </div>
+
+              <div class="resume-group" style="margin-top: 14px;">
+                <label class="resume-label" for="edit-resume-notes-${resume.id}">Notes</label>
+                <textarea
+                  id="edit-resume-notes-${resume.id}"
+                  class="resume-textarea"
+                >${escapeHtml(resume.notes || '')}</textarea>
+              </div>
+
+              <div class="resume-card-actions">
+                <button class="upload-button" type="button" onclick="saveResumeEdit(${resume.id})">Save</button>
+                <button class="secondary-button" type="button" onclick="cancelResumeEdit()">Cancel</button>
+              </div>
+            </article>
+          `;
+          continue;
+        }
+
         const fileLink = resume.file_url
           ? `<a class="resume-file-link" href="${escapeHtml(resume.file_url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(resume.file_name || 'Open file')}</a>`
           : `<div class="resume-file-link">No file</div>`;
@@ -1044,6 +1087,7 @@
             </div>
             <div class="resume-notes">${escapeHtml(resume.notes || 'No notes')}</div>
             <div class="resume-card-actions">
+              <button class="secondary-button" type="button" onclick="startEditResume(${resume.id})">Edit</button>
               <button class="delete-button" type="button" onclick="deleteResume(${resume.id})">Delete</button>
             </div>
           </article>
@@ -1051,6 +1095,54 @@
       }
 
       resumeList.innerHTML = html;
+    }
+
+    function startEditResume(id) {
+      editingResumeId = id;
+      hideMessage(resumeMessage);
+      renderResumeList(currentResumes);
+    }
+
+    function cancelResumeEdit() {
+      editingResumeId = null;
+      hideMessage(resumeMessage);
+      renderResumeList(currentResumes);
+    }
+
+    async function saveResumeEdit(id) {
+      hideMessage(resumeMessage);
+
+      const titleInput = document.getElementById(`edit-resume-title-${id}`);
+      const notesInput = document.getElementById(`edit-resume-notes-${id}`);
+      const fileInput = document.getElementById(`edit-resume-file-${id}`);
+
+      const formData = new FormData();
+      formData.append('title', titleInput.value.trim());
+      formData.append('notes', notesInput.value.trim());
+
+      if (fileInput.files[0]) {
+        formData.append('file', fileInput.files[0]);
+      }
+
+      try {
+        const response = await fetch(`/resumes/${id}/`, {
+          method: 'PATCH',
+          credentials: 'same-origin',
+          body: formData,
+        });
+
+        const data = await response.json().catch(() => null);
+
+        if (!response.ok) {
+          throw new Error((data && data.error) || 'Update failed');
+        }
+
+        editingResumeId = null;
+        showMessage(resumeMessage, 'Resume updated successfully.');
+        await loadProfile();
+      } catch (error) {
+        showMessage(resumeMessage, error.message);
+      }
     }
 
     async function checkAuth() {
@@ -1273,6 +1365,9 @@
         statsRejected.textContent = 0;
         statsClosed.textContent = 0;
 
+        currentResumes = [];
+        editingResumeId = null;
+        resumeForm.reset();
         resumeList.innerHTML = `<div class="message-box">No resumes yet.</div>`;
       } catch (error) {
         showMessage(profileMessage, error.message);
@@ -1327,6 +1422,10 @@
           throw new Error((data && data.error) || 'Delete failed');
         }
 
+        if (editingResumeId === id) {
+          editingResumeId = null;
+        }
+
         showMessage(resumeMessage, 'Resume deleted successfully.');
         await loadProfile();
       } catch (error) {
@@ -1335,6 +1434,9 @@
     }
 
     window.deleteResume = deleteResume;
+    window.startEditResume = startEditResume;
+    window.cancelResumeEdit = cancelResumeEdit;
+    window.saveResumeEdit = saveResumeEdit;
 
     openEditProfileDialogButton.addEventListener('click', () => {
       hideMessage(editProfileMessage);
