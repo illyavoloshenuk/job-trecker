@@ -13,10 +13,17 @@ from pathlib import Path
 import os
 import certifi
 from pathlib import Path
+from dotenv import load_dotenv
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-SECRET_KEY = 'django-insecure-(_#coq6s&=umo+kyb1rjruv+b657*2du+#^_)l6@63(zn^=)x$'
+load_dotenv(BASE_DIR / '.env')
+
+SECRET_KEY = os.getenv('SECRET_KEY')
+
+if not SECRET_KEY:
+    raise ValueError('SECRET_KEY is missing. Check your .env file.')
 
 DEBUG = True
 
